@@ -1,0 +1,36 @@
+winlogbeat.event_logs:
+  - name: Application
+  - name: System
+  - name: Security
+  - name: Microsoft-Windows-Sysmon/Operational
+  - name: Microsoft-Windows-RPC-Events/Operational
+  - name: Microsoft-Windows-WMI-Activity/Operational
+  - name: Microsoft-Windows-TaskScheduler/Operational
+  - name: Microsoft-Windows-SMBServer/Operational
+  - name: Microsoft-Windows-SMBClient/Security
+  - name: Microsoft-Windows-LSA/Operational
+  - name: Microsoft-Windows-GroupPolicy/Operational
+  - name: Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational
+  - name: Microsoft-Windows-TerminalServices-LocalSessionManager/Operational
+  - name: Microsoft-Windows-WinRM/Operational
+    event_id: 6, 81, 224
+  - name: Windows PowerShell
+    event_id: 400, 403, 600, 800
+  - name: Microsoft-Windows-PowerShell/Operational
+    event_id: 4103, 4104, 4105, 4106
+
+processors:
+  - add_host_metadata: {}
+  - add_cloud_metadata: ~
+
+output.kafka:
+  hosts: ["<NAMESPACE>.servicebus.windows.net:9093"]
+  topic: "kustoHub"
+  username: "<CONNECTIONSTRING>"
+  password: "Endpoint=sb://<NAMESPACE>.servicebus.windows.net/;SharedAccessKeyName=<KEYNAME>;SharedAccessKey=<KEY>"
+  ssl.enabled: true
+  sasl.mechanism: plain
+  client_id: winlogbeat
+  required_acks: 1
+  compression: none
+  version: "2.0.0"

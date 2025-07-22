@@ -1,0 +1,21 @@
+.create table WindowsEvents (
+    TimeGenerated: datetime,
+    EventID: int,
+    Channel: string,
+    Level: string,
+    Computer: string,
+    ProviderName: string,
+    User: string,
+    EventData: dynamic
+)
+.create table WindowsEvents ingestion json mapping 'WinlogbeatJson'
+[
+  { "column":"TimeGenerated", "path":"$.winlog.time_created" },
+  { "column":"EventID",       "path":"$.winlog.event_id"     },
+  { "column":"Channel",       "path":"$.winlog.channel"      },
+  { "column":"Level",         "path":"$.winlog.level"        },
+  { "column":"Computer",      "path":"$.winlog.computer_name"},
+  { "column":"ProviderName",  "path":"$.winlog.provider_name"},
+  { "column":"User",          "path":"$.user.name"           },
+  { "column":"EventData",     "path":"$.winlog.event_data"   }
+]
