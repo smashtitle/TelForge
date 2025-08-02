@@ -2,7 +2,8 @@ param(
   [string]$EventHubFqdn,
   [string]$ConnectionString,
   [string]$SasKey,
-  [string]$SasKeyName
+  [string]$SasKeyName,
+  [string]$eventHubName
 )
 
 $ErrorActionPreference = 'Stop'
@@ -27,14 +28,14 @@ Copy-Item -Path (Join-Path $tempPath "winlogbeat-$winlogbeatVersion-windows-x86_
 Copy-Item -Path '.\winlogbeat.yml' -Destination (Join-Path $installRoot 'winlogbeat.yml') -Force
 
 # Token replacement
-$config = Join-Path $installRoot 'winlogbeat.yml'
-(Get-Content .\winlogbeat.yml) `
+$configFile = Join-Path $installRoot 'winlogbeat.yml'
+(Get-Content $configFile) `
   -replace '<NAMESPACE>', $EventHubFqdn `
-  -replace '<EVENTHUB>', $eventHubName `      # Add this line
-  -replace '<SASKEYNAME>', $SasKeyName `      # Add this line
-  -replace '<SASKEY>', $SasKey `              # Add this line
+  -replace '<EVENTHUB>', $eventHubName `
+  -replace '<SASKEYNAME>', $SasKeyName `
+  -replace '<SASKEY>', $SasKey `
   -replace '<CONNECTIONSTRING>', $ConnectionString |
-  Set-Content 'C:\ProgramData\Winlogbeat\winlogbeat.yml'
+  Set-Content $configFile
 
 Write-Host 'Installing Winlogbeat service...'
 Push-Location $installRoot
