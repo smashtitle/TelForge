@@ -1,4 +1,4 @@
-.create table WindowsEvents (
+.create table RawEvents (
     TimeGenerated: datetime,
     EventID: int,
     Channel: string,
@@ -7,8 +7,8 @@
     ProviderName: string,
     User: string,
     EventData: dynamic
-)
-.create table WindowsEvents ingestion json mapping 'WinlogbeatJson'
+);
+.create-or-alter table RawEvents ingestion json mapping 'DirectJson'
 [
   { "column":"TimeGenerated", "path":"$.winlog.time_created" },
   { "column":"EventID",       "path":"$.winlog.event_id"     },
