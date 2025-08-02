@@ -24,9 +24,7 @@ processors:
   - add_cloud_metadata: ~
 
 output.azureeventhub:
-  namespace: "<NAMESPACE>"
+  connection_string: "<CONNECTIONSTRING>"
   eventhub: "<EVENTHUB>"
-  key_name: "<SASKEYNAME>"
-  key: "<SASKEY>"
   compression: none
   version: "2.0.0"
