@@ -23,14 +23,10 @@ processors:
   - add_host_metadata: {}
   - add_cloud_metadata: ~
 
-output.kafka:
-  hosts: ["<NAMESPACE>.servicebus.windows.net:9093"]
-  topic: "kustoHub"
-  username: "<CONNECTIONSTRING>"
-  password: "Endpoint=sb://<NAMESPACE>.servicebus.windows.net/;SharedAccessKeyName=<KEYNAME>;SharedAccessKey=<KEY>"
-  ssl.enabled: true
-  sasl.mechanism: plain
-  client_id: winlogbeat
-  required_acks: 1
+output.azureeventhub:
+  namespace: "<NAMESPACE>"
+  eventhub: "<EVENTHUB>"
+  key_name: "<SASKEYNAME>"
+  key: "<SASKEY>"
   compression: none
   version: "2.0.0"
