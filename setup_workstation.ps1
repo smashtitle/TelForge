@@ -9,7 +9,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $winlogbeatVersion = '9.0.3'
 $archiveName       = "winlogbeat-$winlogbeatVersion-windows-x86_64.zip"
-$downloadUri       = "[https://artifacts.elastic.co/downloads/beats/winlogbeat/$archiveName](https://artifacts.elastic.co/downloads/beats/winlogbeat/$archiveName)"
+$downloadUri       = "https://artifacts.elastic.co/downloads/beats/winlogbeat/$archiveName"
 $installRoot       = 'C:\Program Files\Winlogbeat'
 $tempPath          = Join-Path $env:TEMP 'winlogbeat-install'
 
