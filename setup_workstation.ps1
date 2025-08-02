@@ -1,10 +1,8 @@
 param(
-  [string]$EventHubFqdn,
   [string]$ConnectionString,
-  [string]$SasKey,
-  [string]$SasKeyName,
   [string]$eventHubName
 )
+
 
 $ErrorActionPreference = 'Stop'
 $winlogbeatVersion = '9.0.3'
@@ -30,11 +28,8 @@ Copy-Item -Path '.\winlogbeat.yml' -Destination (Join-Path $sourceDir 'winlogbea
 # 2. Perform token replacement on the staged winlogbeat.yml.
 $configFile = Join-Path $sourceDir 'winlogbeat.yml'
 (Get-Content $configFile) `
-  -replace '<NAMESPACE>', $EventHubFqdn `
-  -replace '<EVENTHUB>', $eventHubName `
-  -replace '<SASKEYNAME>', $SasKeyName `
-  -replace '<SASKEY>', $SasKey `
-  -replace '<CONNECTIONSTRING>', $ConnectionString |
+  -replace '<CONNECTIONSTRING>', $ConnectionString `
+  -replace '<EVENTHUB>', $eventHubName |
   Set-Content $configFile
 
 # --- Installation Phase ---
