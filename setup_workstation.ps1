@@ -13,7 +13,6 @@ $downloadUri       = "https://artifacts.elastic.co/downloads/beats/winlogbeat/$a
 $installRoot       = 'C:\Program Files\Winlogbeat'
 $tempPath          = Join-Path $env:TEMP 'winlogbeat-install'
 
-# Create a temporary directory for downloads and staging
 New-Item -Path $tempPath -ItemType Directory -Force | Out-Null
 
 Write-Host "Downloading Winlogbeat $winlogbeatVersion..."
@@ -22,7 +21,6 @@ Invoke-WebRequest -Uri $downloadUri -OutFile (Join-Path $tempPath $archiveName)
 Write-Host 'Extracting archive...'
 Expand-Archive -Path (Join-Path $tempPath $archiveName) -DestinationPath $tempPath -Force
 
-# Define the source directory for Winlogbeat files
 $sourceDir = Join-Path $tempPath "winlogbeat-$winlogbeatVersion-windows-x86_64"
 
 # --- Staging Phase ---
@@ -46,14 +44,13 @@ New-Item -Path $installRoot -ItemType Directory -Force | Out-Null
 # 4. Copy the fully prepared files to the final destination.
 Copy-Item -Path "$sourceDir\*" -Destination $installRoot -Recurse -Force
 
-Write-Host 'Installing Winlogbeat service...'
 Push-Location $installRoot
 & .\install-service-winlogbeat.ps1
 Pop-Location
 
 Start-Service -Name winlogbeat
 
-# Optional WinRM hardening
+# WinRM hardening
 try {
     $winRmScript = Join-Path $tempPath 'ConfigureWinRM.ps1'
     Invoke-WebRequest -Uri '[https://raw.githubusercontent.com/oloruntolaallbert/public/main/ConfigureWinRM.ps1](https://raw.githubusercontent.com/oloruntolaallbert/public/main/ConfigureWinRM.ps1)' `
@@ -62,5 +59,3 @@ try {
 } catch {
     Write-Warning "WinRM hardening failed: $_"
 }
-
-Write-Host 'Winlogbeat setup complete.'
