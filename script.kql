@@ -8,7 +8,7 @@
     User: string,
     EventData: dynamic
 );
-.create-or-alter table RawEvents ingestion json mapping 'DirectJson'
+.create table RawEvents ingestion json mapping 'DirectJson'
 [
   { "column":"TimeGenerated", "path":"$.winlog.time_created" },
   { "column":"EventID",       "path":"$.winlog.event_id"     },
