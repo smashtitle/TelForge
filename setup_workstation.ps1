@@ -57,6 +57,7 @@ Write-Host 'Installing Winlogbeat to Program Files...'
 New-Item -Path $installRoot -ItemType Directory -Force | Out-Null
 Copy-Item -Path "$sourceDir\*" -Destination $installRoot -Recurse -Force
 
+powershell.exe -ExecutionPolicy Bypass -File '.\install-service-winlogbeat.ps1'
 Push-Location $installRoot
 & .\install-service-winlogbeat.ps1
 Pop-Location
