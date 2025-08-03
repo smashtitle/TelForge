@@ -1,8 +1,8 @@
 param(
   [string]$ConnectionString,
-  [string]$eventHubName
+  [string]$eventHubName,
+  [string]$logstashFqdn
 )
-
 
 $ErrorActionPreference = 'Stop'
 $winlogbeatVersion = '9.0.3'
@@ -29,7 +29,8 @@ Copy-Item -Path '.\winlogbeat.yml' -Destination (Join-Path $sourceDir 'winlogbea
 $configFile = Join-Path $sourceDir 'winlogbeat.yml'
 (Get-Content $configFile) `
   -replace '<CONNECTIONSTRING>', $ConnectionString `
-  -replace '<EVENTHUB>', $eventHubName |
+  -replace '<EVENTHUB>', $eventHubName `
+  -replace '<LOGSTASH_VM_DNS_NAME>', $logstashFqdn | # Add this line
   Set-Content $configFile
 
 # --- Installation Phase ---
