@@ -1,21 +1,46 @@
-.create table RawEvents (
-    TimeGenerated: datetime,
-    EventID: int,
-    Channel: string,
-    Level: string,
-    Computer: string,
-    ProviderName: string,
-    User: string,
-    EventData: dynamic
+.create table WindowsLogonEvents (
+    Timestamp: datetime,
+    AgentHostname: string,
+    EventId: int,
+    LogonType: int,
+    UserName: string,
+    UserDomain: string,
+    SourceIp: string,
+    SourceGeoCountry: string,
+    SourceGeoCity: string,
+    SourceGeoCoordinates: dynamic
 );
-.create table RawEvents ingestion json mapping 'DirectJson'
-[
-  { "column":"TimeGenerated", "path":"$.winlog.time_created" },
-  { "column":"EventID",       "path":"$.winlog.event_id"     },
-  { "column":"Channel",       "path":"$.winlog.channel"      },
-  { "column":"Level",         "path":"$.winlog.level"        },
-  { "column":"Computer",      "path":"$.winlog.computer_name"},
-  { "column":"ProviderName",  "path":"$.winlog.provider_name"},
-  { "column":"User",          "path":"$.user.name"           },
-  { "column":"EventData",     "path":"$.winlog.event_data"   }
-]
+.create-or-alter table WindowsLogonEvents ingestion json mapping 'WindowsLogonEvents_Mapping'
+'['
+'  {"column":"Timestamp", "path":"$[\'@timestamp\']", "transform":null},'
+'  {"column":"AgentHostname", "path":"$.host.name", "transform":null},'
+'  {"column":"EventId", "path":"$.winlog.event_id", "transform":null},'
+'  {"column":"LogonType", "path":"$.winlog.logon_type", "transform":null},'
+'  {"column":"UserName", "path":"$.user.name", "transform":null},'
+'  {"column":"UserDomain", "path":"$.user.domain", "transform":null},'
+'  {"column":"SourceIp", "path":"$.winlog.source_ip", "transform":null},'
+'  {"column":"SourceGeoCountry", "path":"$.source.geo.country_name", "transform":null},'
+'  {"column":"SourceGeoCity", "path":"$.source.geo.city_name", "transform":null},'
+'  {"column":"SourceGeoCoordinates", "path":"$.source.geo.location", "transform":null}'
+']'
+.create table WindowsProcessEvents (
+    Timestamp: datetime,
+    AgentHostname: string,
+    EventId: int,
+    UserName: string,
+    UserDomain: string,
+    ProcessExecutable: string,
+    ParentProcessExecutable: string,
+    ProcessCommandLine: string
+);
+.create-or-alter table WindowsProcessEvents ingestion json mapping 'WindowsProcessEvents_Mapping'
+'['
+'  {"column":"Timestamp", "path":"$[\'@timestamp\']", "transform":null},'
+'  {"column":"AgentHostname", "path":"$.host.name", "transform":null},'
+'  {"column":"EventId", "path":"$.winlog.event_id", "transform":null},'
+'  {"column":"UserName", "path":"$.user.name", "transform":null},'
+'  {"column":"UserDomain", "path":"$.user.domain", "transform":null},'
+'  {"column":"ProcessExecutable", "path":"$.process.executable", "transform":null},'
+'  {"column":"ParentProcessExecutable", "path":"$.process.parent.executable", "transform":null},'
+'  {"column":"ProcessCommandLine", "path":"$.process.command_line", "transform":null}'
+']'
