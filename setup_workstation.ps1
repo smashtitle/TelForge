@@ -4,6 +4,31 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+
+# --- 1. Install Log Source Prerequisites ---
+Write-Host "Installing prerequisite log sources..."
+
+# Enable baseline event logs
+iwr -Uri "https://github.com/smashtitle/EventLog-Baseline-Guide/raw/refs/heads/main/bat/ASD-Servers.bat" -OutFile "C:\\Windows\\Temp\ASD-Servers.bat"
+# Use Start-Process with -Wait to ensure completion
+Start-Process "C:\Windows\Temp\ASD-Servers.bat" -Wait
+
+# Install RPC Firewall
+iwr -Uri "https://github.com/zeronetworks/rpcfirewall/releases/download/v2.2.5/RPCFW_2.2.5.zip" -OutFile "C:\Windows\Temp\RPCFW_2.2.5.zip"
+Expand-Archive -Path "C:\Windows\Temp\RPCFW_2.2.5.zip" -DestinationPath "C:\Tools" -Force
+# Use Start-Process with -Wait to ensure the installer finishes
+Start-Process "cmd.exe" -ArgumentList '/c "C:\Tools\RPCFW_2.2.5\RpcFwManager.exe /install"' -Wait
+
+# Install Sysmon
+iwr -Uri "https://download.sysinternals.com/files/Sysmon.zip" -OutFile "C:\Windows\Temp\Sysmon.zip"
+Expand-Archive -Path "C:\Windows\Temp\Sysmon.zip" -DestinationPath "C:\Tools\Sysmon" -Force
+iwr -Uri "https://github.com/smashtitle/sysmon-modular/raw/refs/heads/master/sysmonconfig-research.xml" -OutFile "C:\Tools\Sysmon\sysmonconfig-research.xml"
+# Use the primary config file for installation
+Start-Process "C:\Tools\Sysmon\Sysmon64.exe" -ArgumentList '-accepteula -i C:\Tools\Sysmon\sysmonconfig-research.xml' -Wait
+
+# --- 2. Install and Configure Winlogbeat ---
+Write-Host "Installing and configuring Winlogbeat..."
+
 $winlogbeatVersion = '9.0.3'
 $archiveName       = "winlogbeat-$winlogbeatVersion-windows-x86_64.zip"
 $downloadUri       = "https://artifacts.elastic.co/downloads/beats/winlogbeat/$archiveName"
@@ -11,18 +36,6 @@ $installRoot       = 'C:\Program Files\Winlogbeat'
 $tempPath          = Join-Path $env:TEMP 'winlogbeat-install'
 
 New-Item -Path $tempPath -ItemType Directory -Force | Out-Null
-
-iwr -Uri "https://github.com/smashtitle/EventLog-Baseline-Guide/raw/refs/heads/main/bat/ASD-Servers.bat" -OutFile "C:\\Windows\\Temp\ASD-Servers.bat"
-& "C:\Windows\Temp\ASD-Servers.bat" -Wait
-
-iwr -Uri "https://github.com/zeronetworks/rpcfirewall/releases/download/v2.2.5/RPCFW_2.2.5.zip" -OutFile "C:\Windows\Temp\RPCFW_2.2.5.zip"
-Expand-Archive -Path "C:\Windows\Temp\RPCFW_2.2.5.zip" -DestinationPath "C:\Tools"
-cmd.exe /c "cd C:\Tools\RPCFW_2.2.5\ && C:\Tools\RPCFW_2.2.5\RpcFwManager.exe /install"
-iwr -Uri "https://download.sysinternals.com/files/Sysmon.zip" -OutFile "C:\Windows\Temp\Sysmon.zip"
-Expand-Archive -Path "C:\Windows\Temp\Sysmon.zip" -DestinationPath "C:\Tools\Sysmon"
-iwr -Uri "https://github.com/smashtitle/sysmon-modular/raw/refs/heads/master/sysmonconfig-research.xml" -OutFile "C:\Tools\Sysmon\sysmonconfig-research.xml"
-iwr -Uri "https://github.com/smashtitle/sysmon-modular/blob/master/sysmon-null.xml" -OutFile "C:\Tools\Sysmon\sysmon-null.xml"
-cmd.exe /c "C:\Tools\Sysmon\Sysmon64.exe -accepteula -i"
 
 Write-Host "Downloading Winlogbeat $winlogbeatVersion..."
 Invoke-WebRequest -Uri $downloadUri -OutFile (Join-Path $tempPath $archiveName)
@@ -32,28 +45,28 @@ Expand-Archive -Path (Join-Path $tempPath $archiveName) -DestinationPath $tempPa
 
 $sourceDir = Join-Path $tempPath "winlogbeat-$winlogbeatVersion-windows-x86_64"
 
-# --- Staging Phase ---
-# 1. Copy the custom winlogbeat.yml to the staged source directory, overwriting the default.
+# Copy the custom winlogbeat.yml to the staged source directory
+# This assumes winlogbeat.yml is in the root of the script execution directory
 Copy-Item -Path '.\winlogbeat.yml' -Destination (Join-Path $sourceDir 'winlogbeat.yml') -Force
 
-# 2. Perform token replacement on the staged winlogbeat.yml.
+# Perform token replacement on the staged winlogbeat.yml
 $configFile = Join-Path $sourceDir 'winlogbeat.yml'
 (Get-Content $configFile) -replace '<LOGSTASH_VM_DNS_NAME>', $logstashIp | Set-Content $configFile
 
-# --- Installation Phase ---
-Write-Host 'Installing to Program Files...'
-# 3. Create the final installation directory.
+Write-Host 'Installing Winlogbeat to Program Files...'
 New-Item -Path $installRoot -ItemType Directory -Force | Out-Null
-# 4. Copy the fully prepared files to the final destination.
 Copy-Item -Path "$sourceDir\*" -Destination $installRoot -Recurse -Force
 
 Push-Location $installRoot
 & .\install-service-winlogbeat.ps1
 Pop-Location
 
+# --- 3. Start Winlogbeat Service ---
+Write-Host "Starting Winlogbeat service..."
 Start-Service -Name winlogbeat
 
-# WinRM hardening
+# --- 4. Optional Hardening ---
+Write-Host "Performing optional WinRM hardening..."
 try {
     $winRmScript = Join-Path $tempPath 'ConfigureWinRM.ps1'
     Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/oloruntolaallbert/public/main/ConfigureWinRM.ps1' -OutFile $winRmScript
@@ -61,3 +74,5 @@ try {
 } catch {
     Write-Warning "WinRM hardening failed: $_"
 }
+
+Write-Host "Workstation setup complete."
