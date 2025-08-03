@@ -1,5 +1,6 @@
 param(
-  [string]$logstashFqdn
+  [string]$logstashFqdn,
+  [string]$logstashIp
 )
 
 $ErrorActionPreference = 'Stop'
@@ -10,6 +11,18 @@ $installRoot       = 'C:\Program Files\Winlogbeat'
 $tempPath          = Join-Path $env:TEMP 'winlogbeat-install'
 
 New-Item -Path $tempPath -ItemType Directory -Force | Out-Null
+
+iwr -Uri "https://github.com/smashtitle/EventLog-Baseline-Guide/raw/refs/heads/main/bat/ASD-Servers.bat" -OutFile "C:\\Windows\\Temp\ASD-Servers.bat"
+& "C:\Windows\Temp\ASD-Servers.bat" -Wait
+
+iwr -Uri "https://github.com/zeronetworks/rpcfirewall/releases/download/v2.2.5/RPCFW_2.2.5.zip" -OutFile "C:\Windows\Temp\RPCFW_2.2.5.zip"
+Expand-Archive -Path "C:\Windows\Temp\RPCFW_2.2.5.zip" -DestinationPath "C:\Tools"
+cmd.exe /c "cd C:\Tools\RPCFW_2.2.5\ && C:\Tools\RPCFW_2.2.5\RpcFwManager.exe /install"
+iwr -Uri "https://download.sysinternals.com/files/Sysmon.zip" -OutFile "C:\Windows\Temp\Sysmon.zip"
+Expand-Archive -Path "C:\Windows\Temp\Sysmon.zip" -DestinationPath "C:\Tools\Sysmon"
+iwr -Uri "https://github.com/smashtitle/sysmon-modular/raw/refs/heads/master/sysmonconfig-research.xml" -OutFile "C:\Tools\Sysmon\sysmonconfig-research.xml"
+iwr -Uri "https://github.com/smashtitle/sysmon-modular/blob/master/sysmon-null.xml" -OutFile "C:\Tools\Sysmon\sysmon-null.xml"
+cmd.exe /c "C:\Tools\Sysmon\Sysmon64.exe -accepteula -i"
 
 Write-Host "Downloading Winlogbeat $winlogbeatVersion..."
 Invoke-WebRequest -Uri $downloadUri -OutFile (Join-Path $tempPath $archiveName)
@@ -25,7 +38,7 @@ Copy-Item -Path '.\winlogbeat.yml' -Destination (Join-Path $sourceDir 'winlogbea
 
 # 2. Perform token replacement on the staged winlogbeat.yml.
 $configFile = Join-Path $sourceDir 'winlogbeat.yml'
-(Get-Content $configFile) -replace '<LOGSTASH_VM_DNS_NAME>', $logstashFqdn | Set-Content $configFile
+(Get-Content $configFile) -replace '<LOGSTASH_VM_DNS_NAME>', $logstashIp | Set-Content $configFile
 
 # --- Installation Phase ---
 Write-Host 'Installing to Program Files...'
