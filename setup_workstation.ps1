@@ -35,13 +35,6 @@ $downloadUri       = "https://artifacts.elastic.co/downloads/beats/winlogbeat/$a
 $installRoot       = 'C:\Program Files\Winlogbeat'
 $tempPath          = Join-Path $env:TEMP 'winlogbeat-install'
 
-# --- SOLUTION: Add this block to ensure a clean temp directory ---
-if (Test-Path $tempPath) {
-    Write-Host "Removing existing temporary directory: $tempPath"
-    Remove-Item -Path $tempPath -Recurse -Force
-}
-# --- End of added block ---
-
 New-Item -Path $tempPath -ItemType Directory -Force | Out-Null
 
 Write-Host "Downloading Winlogbeat $winlogbeatVersion..."
