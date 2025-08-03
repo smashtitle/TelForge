@@ -64,7 +64,7 @@ echo "Logstash Azure Event Hubs output plugin installed."
 # wget -O /etc/logstash/conf.d/10-windows-filter.conf <uri_to_filter_config>
 # wget -O /etc/logstash/conf.d/30-eventhub-output.conf <uri_to_output_config>
 
-wget -O /etc/logstash/conf.d https://github.com/smashtitle/TelForge/raw/refs/heads/main/logstash.conf
+wget -O /etc/logstash/conf.d/logstash.conf https://github.com/smashtitle/TelForge/raw/refs/heads/main/logstash.conf
 
 # --- 6. Enable and Start Logstash Service ---
 # Ensure Logstash starts on boot and start it now
