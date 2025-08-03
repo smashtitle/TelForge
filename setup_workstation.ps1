@@ -1,6 +1,4 @@
 param(
-  [string]$ConnectionString,
-  [string]$eventHubName,
   [string]$logstashFqdn
 )
 
@@ -27,11 +25,7 @@ Copy-Item -Path '.\winlogbeat.yml' -Destination (Join-Path $sourceDir 'winlogbea
 
 # 2. Perform token replacement on the staged winlogbeat.yml.
 $configFile = Join-Path $sourceDir 'winlogbeat.yml'
-(Get-Content $configFile) `
-  -replace '<CONNECTIONSTRING>', $ConnectionString `
-  -replace '<EVENTHUB>', $eventHubName `
-  -replace '<LOGSTASH_VM_DNS_NAME>', $logstashFqdn | # Add this line
-  Set-Content $configFile
+(Get-Content $configFile) -replace '<LOGSTASH_VM_DNS_NAME>', $logstashFqdn | Set-Content $configFile
 
 # --- Installation Phase ---
 Write-Host 'Installing to Program Files...'
@@ -49,8 +43,7 @@ Start-Service -Name winlogbeat
 # WinRM hardening
 try {
     $winRmScript = Join-Path $tempPath 'ConfigureWinRM.ps1'
-    Invoke-WebRequest -Uri '[https://raw.githubusercontent.com/oloruntolaallbert/public/main/ConfigureWinRM.ps1](https://raw.githubusercontent.com/oloruntolaallbert/public/main/ConfigureWinRM.ps1)' `
-                      -OutFile $winRmScript
+    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/oloruntolaallbert/public/main/ConfigureWinRM.ps1' -OutFile $winRmScript
     & powershell.exe -ExecutionPolicy Bypass -File $winRmScript
 } catch {
     Write-Warning "WinRM hardening failed: $_"
