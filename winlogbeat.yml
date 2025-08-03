@@ -2,6 +2,15 @@ winlogbeat.event_logs:
   - name: Application
   - name: System
   - name: Security
+    event_id: 4624, 4625, 4688, 4689, 4720, 4722, 4725, 4732
+    # 4624: Successful Logon
+    # 4625: Failed Logon
+    # 4688: Process Creation
+    # 4689: Process Termination
+    # 4720: A user account was created
+    # 4722: A user account was enabled
+    # 4725: A user account was disabled
+    # 4732: A member was added to a security-enabled local group
   - name: Microsoft-Windows-Sysmon/Operational
   - name: Microsoft-Windows-RPC-Events/Operational
   - name: Microsoft-Windows-WMI-Activity/Operational
@@ -17,14 +26,24 @@ winlogbeat.event_logs:
   - name: Windows PowerShell
     event_id: 400, 403, 600, 800
   - name: Microsoft-Windows-PowerShell/Operational
-    event_id: 4103, 4104, 4105, 4106
+    event_id: 4103, 4104
+    # 4103: Module Logging (Pipeline Execution Details)
+    # 4104: Script Block Logging
 
 processors:
-  - add_host_metadata: {}
+  - add_host_metadata: ~
   - add_cloud_metadata: ~
+  - add_docker_metadata: ~
 
-output.azureeventhub:
-  connection_string: "<CONNECTIONSTRING>"
-  eventhub: "<EVENTHUB>"
-  compression: none
-  version: "2.0.0"
+queue.mem:
+  events: 8192
+  flush.min_events: 512
+  flush.timeout: 5s
+
+queue.disk:
+  max_size: 10GB
+  read_ahead: 1024
+
+output.logstash:
+  hosts: ["<LOGSTASH_VM_DNS_NAME>:5044"]
+  ssl.enabled: true
