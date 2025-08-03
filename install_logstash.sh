@@ -10,6 +10,11 @@ exec > >(tee /var/log/install-logstash.log) 2>&1
 
 echo "Starting Logstash installation script..."
 
+EVENTHUB_NAMESPACE="$1"
+EVENTHUB_NAME="$2"
+EVENTHUB_SAS_KEY_NAME="$3"
+EVENTHUB_SAS_KEY="$4"
+
 # --- 1. System Update and Prerequisites ---
 # Non-interactive frontend to prevent prompts during apt-get install
 export DEBIAN_FRONTEND=noninteractive
@@ -35,6 +40,16 @@ apt-get install -y logstash
 
 echo "Logstash installation complete."
 
+echo "Configuring Logstash service environment variables..."
+mkdir -p /etc/systemd/system/logstash.service.d
+cat <<EOF > /etc/systemd/system/logstash.service.d/override.conf
+[Service]
+Environment="EVENTHUB_NAMESPACE=${EVENTHUB_NAMESPACE}"
+Environment="EVENTHUB_NAME=${EVENTHUB_NAME}"
+Environment="EVENTHUB_SAS_KEY_NAME=${EVENTHUB_SAS_KEY_NAME}"
+Environment="EVENTHUB_SAS_KEY=${EVENTHUB_SAS_KEY}"
+EOF
+
 # --- 4. Install Logstash Azure Event Hubs Plugin ---
 # This plugin is required to send data to Azure Event Hubs
 /usr/share/logstash/bin/logstash-plugin install logstash-output-azure_event_hubs
@@ -48,6 +63,8 @@ echo "Logstash Azure Event Hubs output plugin installed."
 # wget -O /etc/logstash/conf.d/02-beats-input.conf <uri_to_input_config>
 # wget -O /etc/logstash/conf.d/10-windows-filter.conf <uri_to_filter_config>
 # wget -O /etc/logstash/conf.d/30-eventhub-output.conf <uri_to_output_config>
+
+cp ./logstash.conf /etc/logstash/conf.d/
 
 # --- 6. Enable and Start Logstash Service ---
 # Ensure Logstash starts on boot and start it now
