@@ -46,3 +46,4 @@ queue.disk:
 
 output.logstash:
   hosts: ["<LOGSTASH_VM_DNS_NAME>:5044"]
+  ssl.enabled: false
