@@ -35,6 +35,13 @@ $downloadUri       = "https://artifacts.elastic.co/downloads/beats/winlogbeat/$a
 $installRoot       = 'C:\Program Files\Winlogbeat'
 $tempPath          = Join-Path $env:TEMP 'winlogbeat-install'
 
+# --- SOLUTION: Add this block to ensure a clean temp directory ---
+if (Test-Path $tempPath) {
+    Write-Host "Removing existing temporary directory: $tempPath"
+    Remove-Item -Path $tempPath -Recurse -Force
+}
+# --- End of added block ---
+
 New-Item -Path $tempPath -ItemType Directory -Force | Out-Null
 
 Write-Host "Downloading Winlogbeat $winlogbeatVersion..."
@@ -64,15 +71,5 @@ Pop-Location
 # --- 3. Start Winlogbeat Service ---
 Write-Host "Starting Winlogbeat service..."
 Start-Service -Name winlogbeat
-
-# --- 4. Optional Hardening ---
-Write-Host "Performing optional WinRM hardening..."
-try {
-    $winRmScript = Join-Path $tempPath 'ConfigureWinRM.ps1'
-    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/oloruntolaallbert/public/main/ConfigureWinRM.ps1' -OutFile $winRmScript
-    & powershell.exe -ExecutionPolicy Bypass -File $winRmScript
-} catch {
-    Write-Warning "WinRM hardening failed: $_"
-}
 
 Write-Host "Workstation setup complete."
