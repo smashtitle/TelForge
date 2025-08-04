@@ -1,15 +1,14 @@
-# Synopsis: Installs, configures RPC Firewall and Winlogbeat
 param(
     [Parameter(Mandatory=$true)]
     [string]$logstashIp
 )
 
-$toolsDir = "C:\Tools"
-$tempDir = Join-Path $toolsDir "Temp"
-$winlogbeatDir = Join-Path $toolsDir "Winlogbeat"
 $ErrorActionPreference = 'Stop'
 
 try {
+    $toolsDir = "C:\Tools"
+    $tempDir = Join-Path $toolsDir "Temp"
+    $winlogbeatDir = Join-Path $toolsDir "Winlogbeat"
     New-Item -Path $toolsDir, $tempDir, $winlogbeatDir -ItemType Directory -Force | Out-Null
     Add-MpPreference -ExclusionPath $toolsDir, $winlogbeatDir
     Write-Host "[+] Directories created and excluded from Defender."
@@ -35,10 +34,10 @@ try {
     }
 
     $winlogbeatConfigYml = Join-Path $winlogbeatDir "winlogbeat.yml"
-    $configTemplatePath = Join-Path $PSScriptRoot "winlogbeat.yml"
-    if (-not (Test-Path $configTemplatePath)) { throw "'winlogbeat.yml' template not found." }
-    (Get-Content $configTemplatePath -Raw) -replace '<LOGSTASH_VM_DNS_NAME>', $logstashIp | Set-Content -Path $winlogbeatConfigYml -Force
-    Write-Host "[+] Config file created."
+    $winlogbeatConfigUrl = "https://github.com/smashtitle/TelForge/raw/refs/heads/main/winlogbeat.yml"
+    Invoke-WebRequest -Uri $winlogbeatConfigUrl -OutFile $winlogbeatConfigYml -UseBasicParsing
+    (Get-Content $winlogbeatConfigYml -Raw) -replace '<LOGSTASH_VM_DNS_NAME>', $logstashIp | Set-Content -Path $winlogbeatConfigYml -Force
+    Write-Host "[+] Configuration file created."
 
     Start-Process -FilePath $winlogbeatExe -ArgumentList "-c `"$winlogbeatConfigYml`""
     Write-Host "[+] Winlogbeat started."
@@ -48,4 +47,4 @@ catch {
     exit 1
 }
 
-Write-Host "Log forwarding complete."
+Write-Host "Log forwarding completed. "
