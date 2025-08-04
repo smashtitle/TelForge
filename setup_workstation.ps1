@@ -23,7 +23,7 @@ $rpcFwSvcName = "RPCFW"
 
 # Winlogbeat configuration.
 $winlogbeatVersion = '9.1.0'
-$winlogbeatDir     = "C:\Program Files\Winlogbeat"
+# REMOVED: Old, incorrect static path. The correct path is now constructed dynamically below.
 $winlogbeatSvcName = "winlogbeat"
 
 
@@ -69,7 +69,6 @@ try {
         
         # NOTE: Assumes the installer path within the ZIP file.
         # Dynamically find the installer executable within the extracted files.
-        # Dynamically find the installer executable within the extracted files.
         $rpcFwInstaller = Get-ChildItem -Path $rpcFwExtractPath -Filter "RpcFwManager.exe" -Recurse | Select-Object -First 1 -ExpandProperty FullName
 
         if (-not $rpcFwInstaller) {
@@ -103,38 +102,47 @@ try {
     # --- 3. Install and Configure Winlogbeat ---
     Write-Host "--- Installing and Configuring Winlogbeat ---"
 
-    if (Get-Service -Name $winlogbeatSvcName -ErrorAction SilentlyContinue) {
-        Write-Host "[*] Winlogbeat is already installed. Ensuring configuration is up to date."
-        # Stop the service to safely apply configuration changes.
-        Stop-Service -Name $winlogbeatSvcName -Force
-    } else {
-        Write-Host "[*] Downloading Winlogbeat $winlogbeatVersion MSI..."
+    if (-not (Get-Service -Name $winlogbeatSvcName -ErrorAction SilentlyContinue)) {
+        Write-Host "[*] Winlogbeat not found. Installing..."
         $msiName     = "winlogbeat-$winlogbeatVersion-windows-x86_64.msi"
         $downloadUri = "https://artifacts.elastic.co/downloads/beats/winlogbeat/$msiName"
         $msiPath     = Join-Path $tempDir $msiName
         
+        Write-Host "[*] Downloading Winlogbeat $winlogbeatVersion MSI..."
         Invoke-WebRequest -Uri $downloadUri -OutFile $msiPath
 
         Write-Host "[*] Installing Winlogbeat service via MSI..."
-        $msiArgs = "/i `"$msiPath`" /qn" # /qn enables quiet, no-UI installation.
+        $msiArgs = "/i `"$msiPath`" /qn"
         Start-Process -FilePath "msiexec.exe" -ArgumentList $msiArgs -Wait
         Write-Host "[+] Winlogbeat service installed successfully."
+    } else {
+        Write-Host "[*] Winlogbeat is already installed. Stopping service to update configuration."
+        Stop-Service -Name $winlogbeatSvcName -Force
     }
+
+    # --- CORRECTED SECTION ---
+    # The MSI installer places files in a versioned directory.
+    # The previous dynamic path detection was unreliable.
+    # We now construct the path based on the known installation structure.
+    $installPath = "C:\Program Files\Elastic\Beats\$winlogbeatVersion\winlogbeat"
+    Write-Host "[+] Using known Winlogbeat path: $installPath"
     
-    # Configure winlogbeat.yml after installation or if it already exists.
+    if (-not (Test-Path $installPath)) {
+        throw "The expected Winlogbeat directory was not found at '$installPath'."
+    }
+
+    # Configure winlogbeat.yml
     Write-Host "[*] Configuring winlogbeat.yml with Logstash IP: $logstashIp"
     $localConfigPath = Join-Path $PSScriptRoot "winlogbeat.yml"
     if (-not (Test-Path $localConfigPath)) {
-        throw "The required configuration template 'winlogbeat.yml' was not found in the script's directory: $PSScriptRoot"
+        throw "The required configuration template 'winlogbeat.yml' was not found alongside the script."
     }
-    
-    # The MSI installer places files in C:\Program Files\Winlogbeat.
-    $destConfigPath = Join-Path $winlogbeatDir "winlogbeat.yml"
-    
-    # Use a placeholder (e.g., __LOGSTASH_IP__) in your template file.
-    (Get-Content $localConfigPath -Raw) -replace '<LOGSTASH_VM_DNS_NAME>', $logstashIp | Set-Content -Path $destConfigPath -Force
-    Write-Host "[+] Configuration applied."
 
+    $destConfigPath = Join-Path $installPath "winlogbeat.yml"
+    (Get-Content $localConfigPath -Raw) -replace '<LOGSTASH_VM_DNS_NAME>', $logstashIp | Set-Content -Path $destConfigPath -Force
+    Write-Host "[+] Configuration applied to $destConfigPath"
+
+    # Start the Winlogbeat service.
     Write-Host "[*] Starting Winlogbeat service..."
     Start-Service -Name $winlogbeatSvcName
     Write-Host "[+] Winlogbeat service started."
