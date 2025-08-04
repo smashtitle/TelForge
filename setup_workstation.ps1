@@ -3,41 +3,31 @@ param(
     [string]$logstashIp
 )
 
-# --- Script Configuration ---
-# Stop script on any terminating error.
 $ErrorActionPreference = 'Stop'
 
-# Define paths and tool configurations.
 $toolsDir = "C:\Tools"
 $tempDir  = "C:\Tools\Temp"
 
-# Sysmon configuration.
 $sysmonDir       = Join-Path $toolsDir "Sysmon"
 $sysmonExe       = Join-Path $sysmonDir "Sysmon64.exe"
 $sysmonConfigUri = "https://raw.githubusercontent.com/smashtitle/sysmon-modular/master/sysmonconfig-research.xml"
 $sysmonConfigXml = Join-Path $sysmonDir "sysmonconfig-research.xml"
 $sysmonSvcName   = "Sysmon64"
 
-# RPC Firewall configuration.
 $rpcFwSvcName = "RPCFW"
 
-# Winlogbeat configuration.
 $winlogbeatVersion = '9.1.0'
 $winlogbeatSvcName = "winlogbeat"
 
-# Create temporary and tools directories.
 New-Item -Path $toolsDir -ItemType Directory -Force | Out-Null
 New-Item -Path $tempDir  -ItemType Directory -Force | Out-Null
 Add-MpPreference -ExclusionPath $toolsDir
 
-# --- Main Execution Block ---
 try {
     Write-Host "[*] Adding temporary Microsoft Defender exclusion for $toolsDir to prevent interference."
 
-    # --- 2. Install Prerequisite Log Sources ---
     Write-Host "--- Installing Prerequisite Log Sources ---"
 
-    # Apply ASD Event Log Baseline.
     Write-Host "[*] Applying Advanced Security Audit event log baseline..."
     $baselineBatUri = "https://raw.githubusercontent.com/smashtitle/EventLog-Baseline-Guide/main/bat/ASD-Servers.bat"
     $baselineBatPath = Join-Path $tempDir "ASD-Servers.bat"
@@ -45,7 +35,6 @@ try {
     Start-Process -FilePath $baselineBatPath -Wait
     Write-Host "[+] Baseline applied successfully."
 
-    # Install RPC Firewall.
     if (Get-Service -Name $rpcFwSvcName -ErrorAction SilentlyContinue) {
         Write-Host "[*] RPC Firewall is already installed. Skipping."
     } else {
@@ -57,7 +46,6 @@ try {
         Invoke-WebRequest -Uri $rpcFwZipUri -OutFile $rpcFwZipPath
         Expand-Archive -Path $rpcFwZipPath -DestinationPath $rpcFwExtractPath -Force
         
-        # Dynamically find the installer executable within the extracted files.
         $rpcFwInstaller = Get-ChildItem -Path $rpcFwExtractPath -Filter "RpcFwManager.exe" -Recurse | Select-Object -First 1 -ExpandProperty FullName
 
         if (-not $rpcFwInstaller) {
@@ -68,7 +56,6 @@ try {
         Write-Host "[+] RPC Firewall installed successfully."
     }
 
-    # Install Sysmon.
     if (Get-Service -Name $sysmonSvcName -ErrorAction SilentlyContinue) {
         Write-Host "[*] Sysmon is already installed. Skipping."
     } else {
@@ -88,7 +75,6 @@ try {
         Write-Host "[+] Sysmon installed successfully."
     }
 
-    # --- 3. Install and Configure Winlogbeat ---
     Write-Host "--- Installing and Configuring Winlogbeat ---"
 
     if (-not (Get-Service -Name $winlogbeatSvcName -ErrorAction SilentlyContinue)) {
@@ -118,7 +104,6 @@ try {
         throw "The expected Winlogbeat directory was not found at '$installPath'."
     }
 
-    # Configure winlogbeat.yml
     Write-Host "[*] Configuring winlogbeat.yml with Logstash IP: $logstashIp"
     $localConfigPath = Join-Path $PSScriptRoot "winlogbeat.yml"
     if (-not (Test-Path $localConfigPath)) {
@@ -129,7 +114,6 @@ try {
     (Get-Content $localConfigPath -Raw) -replace '<LOGSTASH_VM_DNS_NAME>', $logstashIp | Set-Content -Path $destConfigPath -Force
     Write-Host "[+] Configuration applied to $destConfigPath"
 
-    # Start the Winlogbeat service.
     Write-Host "[*] Starting Winlogbeat service..."
     Start-Service -Name $winlogbeatSvcName
     Write-Host "[+] Winlogbeat service started."
