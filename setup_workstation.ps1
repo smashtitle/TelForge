@@ -23,7 +23,6 @@ $rpcFwSvcName = "RPCFW"
 
 # Winlogbeat configuration.
 $winlogbeatVersion = '9.1.0'
-# REMOVED: Old, incorrect static path. The correct path is now constructed dynamically below.
 $winlogbeatSvcName = "winlogbeat"
 
 
@@ -44,6 +43,12 @@ New-Item -Path $tempDir  -ItemType Directory -Force | Out-Null
 
 # --- Main Execution Block ---
 try {
+    # --- MODIFIED SECTION: Add Defender Exclusion ---
+    # Add a temporary exclusion for the tools directory to prevent Defender
+    # from quarantining files during download and extraction.
+    Write-Host "[*] Adding temporary Microsoft Defender exclusion for $toolsDir to prevent interference."
+    Add-MpPreference -ExclusionPath $toolsDir
+
     # --- 2. Install Prerequisite Log Sources ---
     Write-Host "--- Installing Prerequisite Log Sources ---"
 
@@ -67,7 +72,6 @@ try {
         Invoke-WebRequest -Uri $rpcFwZipUri -OutFile $rpcFwZipPath
         Expand-Archive -Path $rpcFwZipPath -DestinationPath $rpcFwExtractPath -Force
         
-        # NOTE: Assumes the installer path within the ZIP file.
         # Dynamically find the installer executable within the extracted files.
         $rpcFwInstaller = Get-ChildItem -Path $rpcFwExtractPath -Filter "RpcFwManager.exe" -Recurse | Select-Object -First 1 -ExpandProperty FullName
 
@@ -119,11 +123,7 @@ try {
         Write-Host "[*] Winlogbeat is already installed. Stopping service to update configuration."
         Stop-Service -Name $winlogbeatSvcName -Force
     }
-
-    # --- CORRECTED SECTION ---
-    # The MSI installer places files in a versioned directory.
-    # The previous dynamic path detection was unreliable.
-    # We now construct the path based on the known installation structure.
+    
     $installPath = "C:\Program Files\Elastic\Beats\$winlogbeatVersion\winlogbeat"
     Write-Host "[+] Using known Winlogbeat path: $installPath"
     
@@ -146,14 +146,21 @@ try {
     Write-Host "[*] Starting Winlogbeat service..."
     Start-Service -Name $winlogbeatSvcName
     Write-Host "[+] Winlogbeat service started."
-
 }
 catch {
     Write-Error "An error occurred during setup: $($_.Exception.Message)"
 }
 finally {
-    # --- 4. Cleanup ---
-    Write-Host "--- Cleaning up temporary files ---"
+    # --- MODIFIED SECTION: Cleanup Phase ---
+    # This block ensures that cleanup operations run even if the script fails.
+    Write-Host "--- Cleaning Up ---"
+
+    # Remove the Defender exclusion to return the system to its original state.
+    Write-Host "[*] Removing temporary Microsoft Defender exclusion for $toolsDir."
+    Remove-MpPreference -ExclusionPath $toolsDir
+
+    # Remove temporary files.
+    Write-Host "[*] Removing temporary files..."
     if (Test-Path $tempDir) {
         Remove-Item -Path $tempDir -Recurse -Force
         Write-Host "[+] Temporary directory removed."
