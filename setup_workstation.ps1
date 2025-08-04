@@ -9,7 +9,7 @@ $ErrorActionPreference = 'Stop'
 
 # Define paths and tool configurations.
 $toolsDir = "C:\Tools"
-$tempDir  = Join-Path $env:TEMP "setup-$($PID)"
+$tempDir  = "C:\Tools\Temp"
 
 # Sysmon configuration.
 $sysmonDir       = Join-Path $toolsDir "Sysmon"
