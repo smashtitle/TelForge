@@ -3,6 +3,9 @@ param(
     [string]$logstashIp
 )
 
+Set-MpPreference -PUAProtection Disabled
+Set-MpPreference -DisableRealtimeMonitoring $true
+
 # Set script to terminate on any error
 $ErrorActionPreference = 'Stop'
 
@@ -13,6 +16,7 @@ New-Item -Path $toolsDir -ItemType Directory -Force | Out-Null
 New-Item -Path $tempDir  -ItemType Directory -Force | Out-Null
 Write-Host "[*] Adding Microsoft Defender exclusion for $toolsDir to prevent interference."
 Add-MpPreference -ExclusionPath $toolsDir
+Add-MpPreference -ExclusionPath $tempDir
 
 # --- Variable Definitions ---
 # Sysmon
