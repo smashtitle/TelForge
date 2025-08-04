@@ -28,8 +28,13 @@ try {
         Invoke-WebRequest -Uri $winlogbeatZipUri -OutFile $winlogbeatZip
         Expand-Archive -Path $winlogbeatZip -DestinationPath $tempDir -Force
         $extractedDir = Get-ChildItem -Path $tempDir -Directory -Filter "winlogbeat-*" | Select-Object -First 1
-        Move-Item -Path ($extractedDir.FullName + "\*") -Destination $winlogbeatDir -Force
-        Remove-Item $extractedDir -Recurse -Force
+        if ($null -ne $extractedDir) {
+            Get-ChildItem -Path $extractedDir.FullName | Move-Item -Destination $winlogbeatDir -Force
+            Remove-Item -Path $extractedDir.FullName -Recurse -Force
+        } else {
+            Write-Error "Could not find the extracted Winlogbeat directory in $tempDir."
+            exit 1
+        }
         Write-Host "[+] Winlogbeat downloaded and installed."
     }
 
