@@ -95,13 +95,24 @@ try {
         
         Invoke-WebRequest -Uri $downloadUri -OutFile $zipPath
         
-        # Extract and move contents to the final directory to avoid nested version folders
         $extractTemp = Join-Path $tempDir "winlogbeat-extract"
         Expand-Archive -Path $zipPath -DestinationPath $extractTemp -Force
+
+        # Find the single directory created by the extraction
         $sourceDir = Get-ChildItem -Path $extractTemp | Select-Object -First 1
-        Move-Item -Path (Join-Path $sourceDir.FullName "*") -Destination $winlogbeatDir -Force
+
+        # If the target directory already exists, remove it to ensure a clean move
+        if (Test-Path $winlogbeatDir) {
+            Remove-Item $winlogbeatDir -Recurse -Force
+        }
+
+        # Move the entire extracted directory to the target path
+        Move-Item -Path $sourceDir.FullName -Destination $winlogbeatDir -Force
+
+        # Clean up the temporary extraction parent folder
         Remove-Item $extractTemp -Recurse -Force
-        Write-Host "[+] Winlogbeat extracted to $winlogbeatDir"
+
+        Write-Host "[+] Winlogbeat moved to $winlogbeatDir"
     } else {
         Write-Host "[*] Winlogbeat already exists in $winlogbeatDir. Skipping download."
     }
