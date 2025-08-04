@@ -25,29 +25,14 @@ $rpcFwSvcName = "RPCFW"
 $winlogbeatVersion = '9.1.0'
 $winlogbeatSvcName = "winlogbeat"
 
-
-# --- 1. Pre-flight Checks ---
-
-# Check for Administrator privileges.
-Write-Host "Checking for Administrator privileges..."
-if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Error "Administrator privileges are required. Please re-run from an elevated PowerShell prompt."
-    exit 1
-}
-Write-Host "[+] Administrator check passed."
-
 # Create temporary and tools directories.
 New-Item -Path $toolsDir -ItemType Directory -Force | Out-Null
 New-Item -Path $tempDir  -ItemType Directory -Force | Out-Null
-
+Add-MpPreference -ExclusionPath $toolsDir
 
 # --- Main Execution Block ---
 try {
-    # --- MODIFIED SECTION: Add Defender Exclusion ---
-    # Add a temporary exclusion for the tools directory to prevent Defender
-    # from quarantining files during download and extraction.
     Write-Host "[*] Adding temporary Microsoft Defender exclusion for $toolsDir to prevent interference."
-    Add-MpPreference -ExclusionPath $toolsDir
 
     # --- 2. Install Prerequisite Log Sources ---
     Write-Host "--- Installing Prerequisite Log Sources ---"
@@ -79,7 +64,7 @@ try {
             throw "Could not find RpcFwManager.exe in the extracted archive."
         }
 
-        Start-Process -FilePath $rpcFwInstaller -ArgumentList "/install flt" -Wait
+        Start-Process -FilePath $rpcFwInstaller -ArgumentList "/install" -Wait
         Write-Host "[+] RPC Firewall installed successfully."
     }
 
@@ -125,6 +110,7 @@ try {
     }
     
     $installPath = "C:\Program Files\Elastic\Beats\$winlogbeatVersion\winlogbeat"
+    Add-MpPreference -ExclusionPath $installPath
     Write-Host "[+] Using known Winlogbeat path: $installPath"
     
     if (-not (Test-Path $installPath)) {
