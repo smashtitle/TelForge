@@ -55,7 +55,7 @@ New-Item -Path $installRoot -ItemType Directory -Force | Out-Null
 Copy-Item -Path "$sourceDir\*" -Destination $installRoot -Recurse -Force
 
 Push-Location $installRoot
-powershell.exe -ExecutionPolicy Bypass -File "".\install-service-winlogbeat.ps1"
+powershell.exe -ExecutionPolicy Bypass -File ".\install-service-winlogbeat.ps1"
 & .\install-service-winlogbeat.ps1
 Pop-Location
 
