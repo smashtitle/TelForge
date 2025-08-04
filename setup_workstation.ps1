@@ -132,7 +132,7 @@ try {
     $destConfigPath = Join-Path $winlogbeatDir "winlogbeat.yml"
     
     # Use a placeholder (e.g., __LOGSTASH_IP__) in your template file.
-    (Get-Content $localConfigPath -Raw) -replace '__LOGSTASH_IP__', $logstashIp | Set-Content -Path $destConfigPath -Force
+    (Get-Content $localConfigPath -Raw) -replace '<LOGSTASH_VM_DNS_NAME>', $logstashIp | Set-Content -Path $destConfigPath -Force
     Write-Host "[+] Configuration applied."
 
     Write-Host "[*] Starting Winlogbeat service..."
