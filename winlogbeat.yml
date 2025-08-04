@@ -12,7 +12,6 @@ winlogbeat.event_logs:
     # 4725: A user account was disabled
     # 4732: A member was added to a security-enabled local group
   - name: Microsoft-Windows-Sysmon/Operational
-  - name: Microsoft-Windows-RPC-Events/Operational
   - name: Microsoft-Windows-WMI-Activity/Operational
   - name: Microsoft-Windows-TaskScheduler/Operational
   - name: Microsoft-Windows-SMBServer/Operational
