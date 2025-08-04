@@ -8,9 +8,7 @@ $ErrorActionPreference = 'Stop'
 # --- 1. Install Log Source Prerequisites ---
 Write-Host "Installing prerequisite log sources..."
 
-# Enable baseline event logs
 iwr -Uri "https://github.com/smashtitle/EventLog-Baseline-Guide/raw/refs/heads/main/bat/ASD-Servers.bat" -OutFile "C:\\Windows\\Temp\ASD-Servers.bat"
-# Use Start-Process with -Wait to ensure completion
 Start-Process "C:\Windows\Temp\ASD-Servers.bat" -Wait
 
 # Install RPC Firewall
@@ -29,7 +27,7 @@ Start-Process "C:\Tools\Sysmon\Sysmon64.exe" -ArgumentList '-accepteula -i C:\To
 # --- 2. Install and Configure Winlogbeat ---
 Write-Host "Installing and configuring Winlogbeat..."
 
-$winlogbeatVersion = '9.0.3'
+$winlogbeatVersion = '9.1.0'
 $archiveName       = "winlogbeat-$winlogbeatVersion-windows-x86_64.zip"
 $downloadUri       = "https://artifacts.elastic.co/downloads/beats/winlogbeat/$archiveName"
 $installRoot       = 'C:\Program Files\Winlogbeat'
@@ -46,7 +44,6 @@ Expand-Archive -Path (Join-Path $tempPath $archiveName) -DestinationPath $tempPa
 $sourceDir = Join-Path $tempPath "winlogbeat-$winlogbeatVersion-windows-x86_64"
 
 # Copy the custom winlogbeat.yml to the staged source directory
-# This assumes winlogbeat.yml is in the root of the script execution directory
 Copy-Item -Path '.\winlogbeat.yml' -Destination (Join-Path $sourceDir 'winlogbeat.yml') -Force
 
 # Perform token replacement on the staged winlogbeat.yml
@@ -57,12 +54,11 @@ Write-Host 'Installing Winlogbeat to Program Files...'
 New-Item -Path $installRoot -ItemType Directory -Force | Out-Null
 Copy-Item -Path "$sourceDir\*" -Destination $installRoot -Recurse -Force
 
-powershell.exe -ExecutionPolicy Bypass -File '.\install-service-winlogbeat.ps1'
 Push-Location $installRoot
+powershell.exe -ExecutionPolicy Bypass -File "".\install-service-winlogbeat.ps1"
 & .\install-service-winlogbeat.ps1
 Pop-Location
 
-# --- 3. Start Winlogbeat Service ---
 Write-Host "Starting Winlogbeat service..."
 Start-Service -Name winlogbeat
 
