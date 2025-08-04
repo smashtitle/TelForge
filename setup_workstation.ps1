@@ -79,7 +79,7 @@ try {
             throw "Could not find RpcFwManager.exe in the extracted archive."
         }
 
-        Start-Process -FilePath $rpcFwInstaller -ArgumentList "/install" -Wait
+        Start-Process -FilePath $rpcFwInstaller -ArgumentList "/install flt" -Wait
         Write-Host "[+] RPC Firewall installed successfully."
     }
 
