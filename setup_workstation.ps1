@@ -97,21 +97,22 @@ try {
         $downloadUri = "https://artifacts.elastic.co/downloads/beats/winlogbeat/$msiName"
         $msiPath     = Join-Path $tempDir $msiName
         
+        $installPath = "C:\Program Files\Elastic\Beats\$winlogbeatVersion\winlogbeat"
+        Add-MpPreference -ExclusionPath $installPath
+        Write-Host "[+] Using known Winlogbeat path: $installPath"
+
         Write-Host "[*] Downloading Winlogbeat $winlogbeatVersion MSI..."
         Invoke-WebRequest -Uri $downloadUri -OutFile $msiPath
 
         Write-Host "[*] Installing Winlogbeat service via MSI..."
         $msiArgs = "/i `"$msiPath`" /qn"
+
         Start-Process -FilePath "msiexec.exe" -ArgumentList $msiArgs -Wait
         Write-Host "[+] Winlogbeat service installed successfully."
     } else {
         Write-Host "[*] Winlogbeat is already installed. Stopping service to update configuration."
         Stop-Service -Name $winlogbeatSvcName -Force
     }
-    
-    $installPath = "C:\Program Files\Elastic\Beats\$winlogbeatVersion\winlogbeat"
-    Add-MpPreference -ExclusionPath $installPath
-    Write-Host "[+] Using known Winlogbeat path: $installPath"
     
     if (-not (Test-Path $installPath)) {
         throw "The expected Winlogbeat directory was not found at '$installPath'."
@@ -135,22 +136,6 @@ try {
 }
 catch {
     Write-Error "An error occurred during setup: $($_.Exception.Message)"
-}
-finally {
-    # --- MODIFIED SECTION: Cleanup Phase ---
-    # This block ensures that cleanup operations run even if the script fails.
-    Write-Host "--- Cleaning Up ---"
-
-    # Remove the Defender exclusion to return the system to its original state.
-    Write-Host "[*] Removing temporary Microsoft Defender exclusion for $toolsDir."
-    Remove-MpPreference -ExclusionPath $toolsDir
-
-    # Remove temporary files.
-    Write-Host "[*] Removing temporary files..."
-    if (Test-Path $tempDir) {
-        Remove-Item -Path $tempDir -Recurse -Force
-        Write-Host "[+] Temporary directory removed."
-    }
 }
 
 Write-Host "--- Workstation setup complete. ---"
