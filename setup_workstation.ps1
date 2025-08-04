@@ -3,20 +3,25 @@ param(
     [string]$logstashIp
 )
 
+# Disable Microsoft Defender for the setup process
 Set-MpPreference -PUAProtection Disabled
 Set-MpPreference -DisableRealtimeMonitoring $true
 
 # Set script to terminate on any error
 $ErrorActionPreference = 'Stop'
 
-# Define core directories and add a Defender exclusion for the main tools folder
-$toolsDir = "C:\Tools"
-$tempDir  = "C:\Tools\Temp"
-New-Item -Path $toolsDir -ItemType Directory -Force | Out-Null
-New-Item -Path $tempDir  -ItemType Directory -Force | Out-Null
-Write-Host "[*] Adding Microsoft Defender exclusion for $toolsDir to prevent interference."
+# --- Core Directories and Defender Exclusions ---
+$toolsDir        = "C:\Tools"
+$tempDir         = Join-Path $toolsDir "Temp"
+$winlogbeatDir   = Join-Path $toolsDir "Winlogbeat"
+New-Item -Path $toolsDir      -ItemType Directory -Force | Out-Null
+New-Item -Path $tempDir       -ItemType Directory -Force | Out-Null
+New-Item -Path $winlogbeatDir -ItemType Directory -Force | Out-Null
+
+Write-Host "[*] Adding Microsoft Defender exclusions..."
 Add-MpPreference -ExclusionPath $toolsDir
 Add-MpPreference -ExclusionPath $tempDir
+Add-MpPreference -ExclusionPath $winlogbeatDir
 
 # --- Variable Definitions ---
 # Sysmon
@@ -30,12 +35,9 @@ $sysmonSvcName   = "Sysmon64"
 $rpcFwSvcName = "RPCFW"
 
 # Winlogbeat
-$winlogbeatVersion = '9.1.0'
-$winlogbeatSvcName = "winlogbeat"
-# FIX: Define $installPath outside the conditional block to ensure it's always available.
-$installPath = "C:\Program Files\Winlogbeat" # Note: Elastic changes the path structure. This is a more stable default.
-$winlogbeatExePath = Join-Path $installPath "winlogbeat.exe"
-
+$winlogbeatVersion   = '9.1.0'
+$winlogbeatExePath   = Join-Path $winlogbeatDir "winlogbeat.exe"
+$winlogbeatConfigYml = Join-Path $winlogbeatDir "winlogbeat.yml"
 
 try {
     Write-Host "--- Installing Prerequisite Log Sources ---"
@@ -57,12 +59,8 @@ try {
         
         Invoke-WebRequest -Uri $rpcFwZipUri -OutFile $rpcFwZipPath
         Expand-Archive -Path $rpcFwZipPath -DestinationPath $rpcFwExtractPath -Force
-        
         $rpcFwInstaller = Get-ChildItem -Path $rpcFwExtractPath -Filter "RpcFwManager.exe" -Recurse | Select-Object -First 1 -ExpandProperty FullName
-
-        if (-not $rpcFwInstaller) {
-            throw "Could not find RpcFwManager.exe in the extracted archive."
-        }
+        if (-not $rpcFwInstaller) { throw "Could not find RpcFwManager.exe in the extracted archive." }
 
         Start-Process -FilePath $rpcFwInstaller -ArgumentList "/install" -Wait
         Write-Host "[+] RPC Firewall installed successfully."
@@ -70,74 +68,57 @@ try {
 
     if (Get-Service -Name $sysmonSvcName -ErrorAction SilentlyContinue) {
         Write-Host "[*] Sysmon is already installed. Re-applying configuration..."
-        # IMPROVEMENT: Re-apply the configuration in case it has changed.
         Invoke-WebRequest -Uri $sysmonConfigUri -OutFile $sysmonConfigXml -UseBasicParsing
-        $sysmonArgs = @('-c', $sysmonConfigXml)
-        Start-Process -FilePath $sysmonExe -ArgumentList $sysmonArgs -Wait
+        Start-Process -FilePath $sysmonExe -ArgumentList @('-c', $sysmonConfigXml) -Wait
         Write-Host "[+] Sysmon configuration updated."
     } else {
         Write-Host "[*] Installing Sysmon..."
         New-Item -Path $sysmonDir -ItemType Directory -Force | Out-Null
-        
         $sysmonZipUri = "https://download.sysinternals.com/files/Sysmon.zip"
         $sysmonZipPath = Join-Path $tempDir "Sysmon.zip"
         
         Invoke-WebRequest -Uri $sysmonZipUri -OutFile $sysmonZipPath
         Expand-Archive -Path $sysmonZipPath -DestinationPath $sysmonDir -Force
-        
         Invoke-WebRequest -Uri $sysmonConfigUri -OutFile $sysmonConfigXml
         
-        # IMPROVEMENT: Use an array for arguments to avoid quoting issues.
-        $sysmonArgs = @('-accepteula', '-i', $sysmonConfigXml)
-        Start-Process -FilePath $sysmonExe -ArgumentList $sysmonArgs -Wait
+        Start-Process -FilePath $sysmonExe -ArgumentList @('-accepteula', '-i', $sysmonConfigXml) -Wait
         Write-Host "[+] Sysmon installed successfully."
     }
 
     Write-Host "--- Installing and Configuring Winlogbeat ---"
 
-    # FIX: Add the Defender exclusion for the Winlogbeat path unconditionally.
-    Write-Host "[*] Adding Microsoft Defender exclusion for $installPath."
-    Add-MpPreference -ExclusionPath $installPath
-
     if (-not (Test-Path $winlogbeatExePath)) {
-        Write-Host "[*] Winlogbeat not found. Installing..."
-        # Note: The original script used an MSI, but the ZIP provides more control and is more common in automated setups.
-        # This approach uses the ZIP distribution.
+        Write-Host "[*] Winlogbeat not found. Downloading and extracting..."
         $winlogbeatZipName = "winlogbeat-$winlogbeatVersion-windows-x86_64.zip"
         $downloadUri = "https://artifacts.elastic.co/downloads/beats/winlogbeat/$winlogbeatZipName"
         $zipPath     = Join-Path $tempDir $winlogbeatZipName
         
-        Write-Host "[*] Downloading Winlogbeat $winlogbeatVersion ZIP..."
         Invoke-WebRequest -Uri $downloadUri -OutFile $zipPath
-
-        Write-Host "[*] Extracting and installing Winlogbeat..."
-        Expand-Archive -Path $zipPath -DestinationPath $tempDir -Force
-        $extractedDir = Join-Path $tempDir "winlogbeat-$winlogbeatVersion-windows-x86_64"
-        Copy-Item -Path $extractedDir -Destination $installPath -Recurse -Force
         
-        # Run the installation script provided by Elastic
-        PowerShell.exe -ExecutionPolicy Bypass -File (Join-Path $installPath "install-service-winlogbeat.ps1")
-        Write-Host "[+] Winlogbeat service installed successfully."
+        # Extract and move contents to the final directory to avoid nested version folders
+        $extractTemp = Join-Path $tempDir "winlogbeat-extract"
+        Expand-Archive -Path $zipPath -DestinationPath $extractTemp -Force
+        $sourceDir = Get-ChildItem -Path $extractTemp | Select-Object -First 1
+        Move-Item -Path (Join-Path $sourceDir.FullName "*") -Destination $winlogbeatDir -Force
+        Remove-Item $extractTemp -Recurse -Force
+        Write-Host "[+] Winlogbeat extracted to $winlogbeatDir"
     } else {
-        Write-Host "[*] Winlogbeat is already installed. Stopping service to update configuration."
-        Stop-Service -Name $winlogbeatSvcName -Force
+        Write-Host "[*] Winlogbeat already exists in $winlogbeatDir. Skipping download."
     }
 
     Write-Host "[*] Configuring winlogbeat.yml with Logstash IP: $logstashIp"
-    # FIX: Correct the path to the template file relative to the script's location.
-    $localConfigPath = Join-Path $PSScriptRoot "winlogbeat.yml"
-    if (-not (Test-Path $localConfigPath)) {
-        throw "The required configuration template 'winlogbeat.yml' was not found at '$localConfigPath'."
+    $localConfigTemplate = Join-Path $PSScriptRoot "winlogbeat.yml"
+    if (-not (Test-Path $localConfigTemplate)) {
+        throw "The required configuration template 'winlogbeat.yml' was not found at '$localConfigTemplate'."
     }
+    (Get-Content $localConfigTemplate -Raw) -replace '<LOGSTASH_VM_DNS_NAME>', $logstashIp | Set-Content -Path $winlogbeatConfigYml -Force
+    Write-Host "[+] Configuration applied to $winlogbeatConfigYml"
 
-    # FIX: Use the always-defined $installPath variable.
-    $destConfigPath = Join-Path $installPath "winlogbeat.yml"
-    (Get-Content $localConfigPath -Raw) -replace '<LOGSTASH_VM_DNS_NAME>', $logstashIp | Set-Content -Path $destConfigPath -Force
-    Write-Host "[+] Configuration applied to $destConfigPath"
+    Write-Host "[*] Launching Winlogbeat..."
+    $arguments = @("-c", "`"$winlogbeatConfigYml`"")
+    Start-Process -FilePath $winlogbeatExePath -ArgumentList $arguments
+    Write-Host "[+] Winlogbeat process started."
 
-    Write-Host "[*] Starting Winlogbeat service..."
-    Start-Service -Name $winlogbeatSvcName
-    Write-Host "[+] Winlogbeat service started."
 }
 catch {
     Write-Error "An error occurred during setup: $($_.Exception.Message)"
