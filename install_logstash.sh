@@ -40,6 +40,11 @@ apt-get install -y logstash
 
 echo "Logstash installation complete."
 
+# --- 4. Fix Directory Permissions ---
+# Set the correct ownership for the Logstash data directory to ensure writability.
+echo "Setting ownership for Logstash data directory..."
+chown -R logstash:logstash /var/lib/logstash
+
 echo "Configuring Logstash service environment variables..."
 mkdir -p /etc/systemd/system/logstash.service.d
 cat <<EOF > /etc/systemd/system/logstash.service.d/override.conf
@@ -50,12 +55,12 @@ Environment="EVENTHUB_SAS_KEY_NAME=${EVENTHUB_SAS_KEY_NAME}"
 Environment="EVENTHUB_SAS_KEY=${EVENTHUB_SAS_KEY}"
 EOF
 
-# --- 4. Install Logstash Azure Event Hubs Plugin ---
+# --- 5. Install Logstash Azure Event Hubs Plugin ---
 # This plugin is required to send data to Azure Event Hubs
 /usr/share/logstash/bin/logstash-plugin install logstash-output-azure_event_hubs
 echo "Logstash Azure Event Hubs output plugin installed."
 
-# --- 5. Deploy Logstash Configuration ---
+# --- 6. Deploy Logstash Configuration ---
 # In a real-world scenario, you would pull these from a secure location (e.g., Azure Blob Storage with SAS token)
 # For this example, we assume they are available alongside the script or are created dynamically.
 # This section should be adapted to your configuration management strategy.
@@ -66,7 +71,7 @@ echo "Logstash Azure Event Hubs output plugin installed."
 
 wget -O /etc/logstash/conf.d/logstash.conf https://github.com/smashtitle/TelForge/raw/refs/heads/main/logstash.conf
 
-# --- 6. Enable and Start Logstash Service ---
+# --- 7. Enable and Start Logstash Service ---
 # Ensure Logstash starts on boot and start it now
 systemctl daemon-reload
 
