@@ -1,3 +1,4 @@
+// Create the table for Windows Logon Events
 .create table WindowsLogonEvents (
     Timestamp: datetime,
     AgentHostname: string,
@@ -12,16 +13,16 @@
 );
 .create-or-alter table WindowsLogonEvents ingestion json mapping 'WindowsLogonEvents_Mapping'
 '['
-'  {"column":"Timestamp", "path":"$[\'@timestamp\']", "transform":null},'
-'  {"column":"AgentHostname", "path":"$.host.name", "transform":null},'
-'  {"column":"EventId", "path":"$.winlog.event_id", "transform":null},'
-'  {"column":"LogonType", "path":"$.winlog.logon_type", "transform":null},'
-'  {"column":"UserName", "path":"$.user.name", "transform":null},'
-'  {"column":"UserDomain", "path":"$.user.domain", "transform":null},'
-'  {"column":"SourceIp", "path":"$.winlog.source_ip", "transform":null},'
-'  {"column":"SourceGeoCountry", "path":"$.source.geo.country_name", "transform":null},'
-'  {"column":"SourceGeoCity", "path":"$.source.geo.city_name", "transform":null},'
-'  {"column":"SourceGeoCoordinates", "path":"$.source.geo.location", "transform":null}'
+'  {"column":"Timestamp", "path":"$[\'@timestamp\']"},'
+'  {"column":"AgentHostname", "path":"$.host.name"},'
+'  {"column":"EventId", "path":"$.winlog.event_id"},'
+'  {"column":"LogonType", "path":"$.winlog.logon_type"},'
+'  {"column":"UserName", "path":"$.user.name"},'
+'  {"column":"UserDomain", "path":"$.user.domain"},'
+'  {"column":"SourceIp", "path":"$.winlog.source_ip"},'
+'  {"column":"SourceGeoCountry", "path":"$.source.geo.country_name"},'
+'  {"column":"SourceGeoCity", "path":"$.source.geo.city_name"},'
+'  {"column":"SourceGeoCoordinates", "path":"$.source.geo.location"}'
 ']'
 .create table WindowsProcessEvents (
     Timestamp: datetime,
@@ -35,12 +36,12 @@
 );
 .create-or-alter table WindowsProcessEvents ingestion json mapping 'WindowsProcessEvents_Mapping'
 '['
-'  {"column":"Timestamp", "path":"$[\'@timestamp\']", "transform":null},'
-'  {"column":"AgentHostname", "path":"$.host.name", "transform":null},'
-'  {"column":"EventId", "path":"$.winlog.event_id", "transform":null},'
-'  {"column":"UserName", "path":"$.user.name", "transform":null},'
-'  {"column":"UserDomain", "path":"$.user.domain", "transform":null},'
-'  {"column":"ProcessExecutable", "path":"$.process.executable", "transform":null},'
-'  {"column":"ParentProcessExecutable", "path":"$.process.parent.executable", "transform":null},'
-'  {"column":"ProcessCommandLine", "path":"$.process.command_line", "transform":null}'
+'  {"column":"Timestamp", "path":"$[\'@timestamp\']"},'
+'  {"column":"AgentHostname", "path":"$.host.name"},'
+'  {"column":"EventId", "path":"$.winlog.event_id"},'
+'  {"column":"UserName", "path":"$.user.name"},'
+'  {"column":"UserDomain", "path":"$.user.domain"},'
+'  {"column":"ProcessExecutable", "path":"$.process.executable"},'
+'  {"column":"ParentProcessExecutable", "path":"$.process.parent.executable"},'
+'  {"column":"ProcessCommandLine", "path":"$.process.command_line"}'
 ']'
