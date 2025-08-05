@@ -68,5 +68,7 @@ wget -O /etc/logstash/conf.d/logstash.conf https://github.com/smashtitle/TelForg
 
 # --- 6. Enable and Start Logstash Service ---
 # Ensure Logstash starts on boot and start it now
+systemctl daemon-reload
+
 systemctl enable logstash
 systemctl start logstash
