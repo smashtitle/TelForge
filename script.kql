@@ -1,47 +1,25 @@
-// Create the table for Windows Logon Events
-.create table WindowsLogonEvents (
+.create table Events (
     Timestamp: datetime,
     AgentHostname: string,
     EventId: int,
-    LogonType: int,
+    ProviderName: string,
+    Activity: string,
     UserName: string,
-    UserDomain: string,
     SourceIp: string,
-    SourceGeoCountry: string,
-    SourceGeoCity: string,
-    SourceGeoCoordinates: dynamic
-);
-.create-or-alter table WindowsLogonEvents ingestion json mapping 'WindowsLogonEvents_Mapping'
-'['
-'  {"column":"Timestamp", "path":"$[\'@timestamp\']"},'
-'  {"column":"AgentHostname", "path":"$.host.name"},'
-'  {"column":"EventId", "path":"$.winlog.event_id"},'
-'  {"column":"LogonType", "path":"$.winlog.logon_type"},'
-'  {"column":"UserName", "path":"$.user.name"},'
-'  {"column":"UserDomain", "path":"$.user.domain"},'
-'  {"column":"SourceIp", "path":"$.winlog.source_ip"},'
-'  {"column":"SourceGeoCountry", "path":"$.source.geo.country_name"},'
-'  {"column":"SourceGeoCity", "path":"$.source.geo.city_name"},'
-'  {"column":"SourceGeoCoordinates", "path":"$.source.geo.location"}'
-']'
-.create table WindowsProcessEvents (
-    Timestamp: datetime,
-    AgentHostname: string,
-    EventId: int,
-    UserName: string,
-    UserDomain: string,
     ProcessExecutable: string,
     ParentProcessExecutable: string,
-    ProcessCommandLine: string
+    FullEvent: dynamic
 );
-.create-or-alter table WindowsProcessEvents ingestion json mapping 'WindowsProcessEvents_Mapping'
+.create-or-alter table Events ingestion json mapping 'Events_Mapping'
 '['
 '  {"column":"Timestamp", "path":"$[\'@timestamp\']"},'
 '  {"column":"AgentHostname", "path":"$.host.name"},'
 '  {"column":"EventId", "path":"$.winlog.event_id"},'
+'  {"column":"ProviderName", "path":"$.winlog.provider_name"},'
+'  {"column":"Activity", "path":"$.winlog.task"},'
 '  {"column":"UserName", "path":"$.user.name"},'
-'  {"column":"UserDomain", "path":"$.user.domain"},'
+'  {"column":"SourceIp", "path":"$.source.ip"},'
 '  {"column":"ProcessExecutable", "path":"$.process.executable"},'
 '  {"column":"ParentProcessExecutable", "path":"$.process.parent.executable"},'
-'  {"column":"ProcessCommandLine", "path":"$.process.command_line"}'
+'  {"column":"FullEvent", "path":"$"}'
 ']'
