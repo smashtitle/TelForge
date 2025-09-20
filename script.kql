@@ -1,0 +1,931 @@
+.create-merge table Events (
+    Timestamp: datetime,
+    AgentHostname: string,
+    EventId: string,
+    ProviderName: string,
+    Activity: string,
+    UserName: string,
+    FullEvent: dynamic
+)
+
+.create-or-alter table Events ingestion json mapping 'Events_Mapping'
+'['
+'  {"column":"Timestamp", "path":"$.records[0].time"},'
+'  {"column":"AgentHostname", "path":"$.records[0].properties.LoggingComputer"},'
+'  {"column":"EventId", "path":"$.records[0].properties.EventNumber"},'
+'  {"column":"ProviderName", "path":"$.records[0].properties.PublisherName"},'
+'  {"column":"Activity", "path":"$.records[0].properties.EventCategory"},'
+'  {"column":"UserName", "path":"$.records[0].properties.UserName"},'
+'  {"column":"FullEvent", "path":"$"}'
+']'
+
+.create-merge table ASimAuditEventLogs (
+    EventCount: string, // Mandatory common ASIM field
+    EventStartTime: datetime, // Mandatory common ASIM field
+    EventEndTime: datetime, // Mandatory common ASIM field
+    EventType: string, // Mandatory common ASIM field
+    EventResult: string, // Mandatory common ASIM field
+    EventProduct: string, // Mandatory common ASIM field
+    EventVendor: string, // Mandatory common ASIM field
+    EventSchema: string, // Mandatory common ASIM field
+    EventSchemaVersion: string, // Mandatory common ASIM field
+    Dvc: string, // Mandatory common ASIM field
+    EventResultDetails: string, // Recommended common ASIM field
+    EventSeverity: string, // Recommended common ASIM field
+    EventUid: string, // Recommended common ASIM field
+    DvcIpAddr: string, // Recommended common ASIM field
+    DvcHostname: string, // Recommended common ASIM field
+    DvcDomain: string, // Recommended common ASIM field
+    DvcDomainType: string, // Recommended common ASIM field
+    DvcFQDN: string, // Recommended common ASIM field
+    DvcId: string, // Recommended common ASIM field
+    DvcIdType: string, // Recommended common ASIM field
+    DvcAction: string, // Recommended common ASIM field
+    EventMessage: string, // Optional common ASIM field
+    EventSubType: string, // Optional common ASIM field
+    EventOriginalUid: string, // Optional common ASIM field
+    EventOriginalType: string, // Optional common ASIM field
+    EventOriginalSubType: string, // Optional common ASIM field
+    EventOriginalResultDetails: string, // Optional common ASIM field
+    EventOriginalSeverity: string, // Optional common ASIM field
+    EventProductVersion: string, // Optional common ASIM field
+    EventReportUrl: string, // Optional common ASIM field
+    EventOwner: string, // Optional common ASIM field
+    DvcZone: string, // Optional common ASIM field
+    DvcMacAddr: string, // Optional common ASIM field
+    DvcOs: string, // Optional common ASIM field
+    DvcOsVersion: string, // Optional common ASIM field
+    DvcOriginalAction: string, // Optional common ASIM field
+    DvcInterface: string, // Optional common ASIM field
+    AdditionalFields: dynamic, // Optional common ASIM field
+    DvcDescription: string, // Optional common ASIM field
+    DvcScope: string, // Optional common ASIM field
+    DvcScopeId: string, // Optional common ASIM field
+    Operation: string, // Mandatory Audit fields
+    Object: string, // Mandatory Audit fields
+    ObjectType: string, // Mandatory Audit fields
+    OldValue: string, // Optional Audit fields
+    NewValue: string, // Optional Audit fields
+    ValueType: string, // Conditional Audit fields
+    ActorUserId: string, // Optional Actor fields
+    ActorScope: string, // Optional Actor fields
+    ActorScopeId: string, // Optional Actor fields
+    ActorUserIdType: string, // Conditional Actor fields
+    ActorUsername: string, // Recommended Actor fields
+    ActorUsernameType: string, // Conditional Actor fields
+    ActorUserType: string, // Optional Actor fields
+    ActorOriginalUserType: string, // Optional Actor fields
+    ActorSessionId: string, // Optional Actor fields
+    TargetAppId: string, // Optional Target application fields
+    TargetAppName: string, // Optional Target application fields
+    TargetAppType: string, // Optional Target application fields
+    TargetUrl: string, // Optional Target application fields
+    TargetHostname: string, // Recommended Target system fields
+    TargetDomain: string, // Recommended Target system fields
+    TargetDomainType: string, // Conditional Target system fields
+    TargetFQDN: string, // Optional Target system fields
+    TargetDescription: string, // Optional Target system fields
+    TargetDvcId: string, // Optional Target system fields
+    TargetDvcScopeId: string, // Optional Target system fields
+    TargetDvcScope: string, // Optional Target system fields
+    TargetDvcIdType: string, // Conditional Target system fields
+    TargetDeviceType: string, // Optional Target system fields
+    TargetIpAddr: string, // Optional Target system fields
+    TargetDvcOs: string, // Optional Target system fields
+    TargetPortNumber: int, // Optional Target system fields
+    ActingAppId: string, // Optional Acting Application fields
+    ActiveAppName: string, // Optional Acting Application fields
+    ActingAppType: string, // Optional Acting Application fields
+    HttpUserAgent: string, // Optional Acting Application fields
+    SrcIpAddr: string, // Recommended Source system fields
+    SrcPortNumber: int, // Optional Source system fields
+    SrcHostname: string, // Recommended Source system fields
+    SrcDomain: string, // Recommended Source system fields
+    SrcDomainType: string, // Conditional Source system fields
+    SrcFQDN: string, // Optional Source system fields
+    SrcDescription: string, // Optional Source system fields
+    SrcDvcId: string, // Optional Source system fields
+    SrcDvcScopeId: string, // Optional Source system fields
+    SrcDvcScope: string, // Optional Source system fields
+    SrcDvcIdType: string, // Conditional Source system fields
+    SrcDeviceType: string, // Optional Source system fields
+    SrcSubscriptionId: string, // Optional Source system fields
+    SrcGeoCountry: string, // Optional Source system fields
+    SrcGeoRegion: string, // Optional Source system fields
+    SrcGeoCity: string, // Optional Source system fields
+    SrcGeoLatitude: string, // Optional Source system fields
+    SrcGeoLongitude: string, // Optional Source system fields
+    RuleName: string, // Optional Inspection fields
+    RuleNumber: int, // Optional Inspection fields
+    ThreatId: string, // Optional Inspection fields
+    ThreatName: string, // Optional Inspection fields
+    ThreatCategory: string, // Optional Inspection fields
+    ThreatRiskLevel: int, // Optional Inspection fields
+    ThreatOriginalRiskLevel: string, // Optional Inspection fields
+    ThreatConfidence: int, // Optional Inspection fields
+    ThreatOriginalConfidence: string, // Optional Inspection fields
+    ThreatIsActive: bool, // Optional Inspection fields
+    ThreatFirstReportedTime: datetime, // Optional Inspection fields
+    ThreatLastReportedTime: datetime, // Optional Inspection fields
+    ThreatIpAddr: string, // Optional Inspection fields
+    ThreatField: string // Optional Inspection fields
+)
+
+.create-merge table ASimAuthenticationEventLogs (
+    EventCount: string, // Mandatory common ASIM field
+    EventStartTime: datetime, // Mandatory common ASIM field
+    EventEndTime: datetime, // Mandatory common ASIM field
+    EventType: string, // Mandatory common ASIM field
+    EventResult: string, // Mandatory common ASIM field
+    EventProduct: string, // Mandatory common ASIM field
+    EventVendor: string, // Mandatory common ASIM field
+    EventSchema: string, // Mandatory common ASIM field
+    EventSchemaVersion: string, // Mandatory common ASIM field
+    Dvc: string, // Mandatory common ASIM field
+    EventResultDetails: string, // Recommended common ASIM field
+    EventSeverity: string, // Recommended common ASIM field
+    EventUid: string, // Recommended common ASIM field
+    DvcIpAddr: string, // Recommended common ASIM field
+    DvcHostname: string, // Recommended common ASIM field
+    DvcDomain: string, // Recommended common ASIM field
+    DvcDomainType: string, // Recommended common ASIM field
+    DvcFQDN: string, // Recommended common ASIM field
+    DvcId: string, // Recommended common ASIM field
+    DvcIdType: string, // Recommended common ASIM field
+    DvcAction: string, // Recommended common ASIM field
+    EventMessage: string, // Optional common ASIM field
+    EventSubType: string, // Optional common ASIM field
+    EventOriginalUid: string, // Optional common ASIM field
+    EventOriginalType: string, // Optional common ASIM field
+    EventOriginalSubType: string, // Optional common ASIM field
+    EventOriginalResultDetails: string, // Optional common ASIM field
+    EventOriginalSeverity: string, // Optional common ASIM field
+    EventProductVersion: string, // Optional common ASIM field
+    EventReportUrl: string, // Optional common ASIM field
+    EventOwner: string, // Optional common ASIM field
+    DvcZone: string, // Optional common ASIM field
+    DvcMacAddr: string, // Optional common ASIM field
+    DvcOs: string, // Optional common ASIM field
+    DvcOsVersion: string, // Optional common ASIM field
+    DvcOriginalAction: string, // Optional common ASIM field
+    DvcInterface: string, // Optional common ASIM field
+    AdditionalFields: dynamic, // Optional common ASIM field
+    DvcDescription: string, // Optional common ASIM field
+    DvcScope: string, // Optional common ASIM field
+    DvcScopeId: string, // Optional common ASIM field
+    LogonMethod: string, // Optional Authentication-specific fields
+    LogonProtocol: string, // Optional Authentication-specific fields
+    ActorUserId: string, // Optional Actor fields
+    ActorScope: string, // Optional Actor fields
+    ActorScopeId: string, // Optional Actor fields
+    ActorUserIdType: string, // Conditional Actor fields
+    ActorUsername: string, // Optional Actor fields
+    ActorUsernameType: string, // Conditional Actor fields
+    ActorUserType: string, // Optional Actor fields
+    ActorOriginalUserType: string, // Optional Actor fields
+    ActorSessionId: string, // Optional Actor fields
+    ActingAppId: string, // Optional Acting Application fields
+    ActingAppName: string, // Optional Acting Application fields
+    ActingAppType: string, // Optional Acting Application fields
+    HttpUserAgent: string, // Optional Acting Application fields
+    TargetUserId: string, // Optional Target user fields
+    TargetUserScope: string, // Optional Target user fields
+    TargetUserScopeId: string, // Optional Target user fields
+    TargetUserIdType: string, // Conditional Target user fields
+    TargetUsername: string, // Optional Target user fields
+    TargetUsernameType: string, // Conditional Target user fields
+    TargetUserType: string, // Optional Target user fields
+    TargetSessionId: string, // Optional Target user fields
+    TargetOriginalUserType: string, // Optional Target user fields
+    Src: string, // Recommended Source system fields
+    SrcDvcId: string, // Optional Source system fields
+    SrcDvcScopeId: string, // Optional Source system fields
+    SrcDvcScope: string, // Optional Source system fields
+    SrcDvcIdType: string, // Conditional Source system fields
+    SrcDeviceType: string, // Optional Source system fields
+    SrcHostname: string, // Recommended Source system fields
+    SrcDomain: string, // Recommended Source system fields
+    SrcDomainType: string, // Conditional Source system fields
+    SrcFQDN: string, // Optional Source system fields
+    SrcDescription: string, // Optional Source system fields
+    SrcIpAddr: string, // Optional Source system fields
+    SrcPortNumber: int, // Optional Source system fields
+    SrcDvcOs: string, // Optional Source system fields
+    SrcIsp: string, // Optional Source system fields
+    SrcGeoCountry: string, // Optional Source system fields
+    SrcGeoCity: string, // Optional Source system fields
+    SrcGeoRegion: string, // Optional Source system fields
+    SrcGeoLongitude: string, // Optional Source system fields
+    SrcGeoLatitude: string, // Optional Source system fields
+    SrcRiskLevel: int, // Optional Source system fields
+    SrcOriginalRiskLevel: string, // Optional Source system fields
+    TargetAppId: string, // Optional Target application fields
+    TargetAppName: string, // Optional Target application fields
+    TargetAppType: string, // Optional Target application fields
+    TargetUrl: string, // Optional Target application fields
+    TargetHostname: string, // Recommended Target system fields
+    TargetDomain: string, // Recommended Target system fields
+    TargetDomainType: string, // Conditional Target system fields
+    TargetFQDN: string, // Optional Target system fields
+    TargetDescription: string, // Optional Target system fields
+    TargetDvcId: string, // Optional Target system fields
+    TargetDvcScopeId: string, // Optional Target system fields
+    TargetDvcScope: string, // Optional Target system fields
+    TargetDvcIdType: string, // Conditional Target system fields
+    TargetDeviceType: string, // Optional Target system fields
+    TargetIpAddr: string, // Optional Target system fields
+    TargetDvcOs: string, // Optional Target system fields
+    TargetPortNumber: int, // Optional Target system fields
+    TargetGeoCountry: string, // Optional Target system fields
+    TargetGeoRegion: string, // Optional Target system fields
+    TargetGeoCity: string, // Optional Target system fields
+    TargetGeoLatitude: string, // Optional Target system fields
+    TargetGeoLongitude: string, // Optional Target system fields
+    TargetRiskLevel: int, // Optional Target system fields
+    TargetOriginalRiskLevel: string // Optional Target system fields
+)
+
+.create-merge table ASimDnsActivityLogs (
+    EventCount: string, // Mandatory common ASIM field
+    EventStartTime: datetime, // Mandatory common ASIM field
+    EventEndTime: datetime, // Mandatory common ASIM field
+    EventType: string, // Mandatory common ASIM field
+    EventResult: string, // Mandatory common ASIM field
+    EventProduct: string, // Mandatory common ASIM field
+    EventVendor: string, // Mandatory common ASIM field
+    EventSchema: string, // Mandatory common ASIM field
+    EventSchemaVersion: string, // Mandatory common ASIM field
+    Dvc: string, // Mandatory common ASIM field
+    EventResultDetails: string, // Recommended common ASIM field
+    EventSeverity: string, // Recommended common ASIM field
+    EventUid: string, // Recommended common ASIM field
+    DvcIpAddr: string, // Recommended common ASIM field
+    DvcHostname: string, // Recommended common ASIM field
+    DvcDomain: string, // Recommended common ASIM field
+    DvcDomainType: string, // Recommended common ASIM field
+    DvcFQDN: string, // Recommended common ASIM field
+    DvcId: string, // Recommended common ASIM field
+    DvcIdType: string, // Recommended common ASIM field
+    DvcAction: string, // Recommended common ASIM field
+    EventMessage: string, // Optional common ASIM field
+    EventSubType: string, // Optional common ASIM field
+    EventOriginalUid: string, // Optional common ASIM field
+    EventOriginalType: string, // Optional common ASIM field
+    EventOriginalSubType: string, // Optional common ASIM field
+    EventOriginalResultDetails: string, // Optional common ASIM field
+    EventOriginalSeverity: string, // Optional common ASIM field
+    EventProductVersion: string, // Optional common ASIM field
+    EventReportUrl: string, // Optional common ASIM field
+    EventOwner: string, // Optional common ASIM field
+    DvcZone: string, // Optional common ASIM field
+    DvcMacAddr: string, // Optional common ASIM field
+    DvcOs: string, // Optional common ASIM field
+    DvcOsVersion: string, // Optional common ASIM field
+    DvcOriginalAction: string, // Optional common ASIM field
+    DvcInterface: string, // Optional common ASIM field
+    AdditionalFields: dynamic, // Optional common ASIM field
+    DvcDescription: string, // Optional common ASIM field
+    DvcScope: string, // Optional common ASIM field
+    DvcScopeId: string, // Optional common ASIM field
+    SrcIpAddr: string, // Recommended Source system ASIM field
+    SrcPortNumber: int, // Optional Source system ASIM field
+    SrcGeoCountry: string, // Optional Source system ASIM field
+    SrcGeoRegion: string, // Optional Source system ASIM field
+    SrcGeoCity: string, // Optional Source system ASIM field
+    SrcGeoLatitude: string, // Optional Source system ASIM field
+    SrcGeoLongitude: string, // Optional Source system ASIM field
+    SrcRiskLevel: int, // Optional Source system ASIM field
+    SrcOriginalRiskLevel: string, // Optional Source system ASIM field
+    SrcHostname: string, // Recommended Source system ASIM field
+    SrcDomain: string, // Recommended Source system ASIM field
+    SrcDomainType: string, // Conditional Source system ASIM field
+    SrcFQDN: string, // Optional Source system ASIM field
+    SrcDvcId: string, // Optional Source system ASIM field
+    SrcDvcScopeId: string, // Optional Source system ASIM field
+    SrcDvcScope: string, // Optional Source system ASIM field
+    SrcDvcIdType: string, // Conditional Source system ASIM field
+    SrcDeviceType: string, // Optional Source system ASIM field
+    SrcDescription: string, // Optional Source system ASIM field
+    SrcUserId: string, // Optional Source user ASIM field
+    SrcUserScope: string, // Optional Source user ASIM field
+    SrcUserScopeId: string, // Optional Source user ASIM field
+    SrcUserIdType: string, // Conditional Source user ASIM field
+    SrcUsername: string, // Optional Source user ASIM field
+    SrcUsernameType: string, // Conditional Source user ASIM field
+    SrcUserType: string, // Optional Source user ASIM field
+    SrcUserSessionId: string, // Optional Source user ASIM field
+    SrcOriginalUserType: string, // Optional Source user ASIM field
+    SrcProcessName: string, // Optional Source process ASIM field
+    SrcProcessId: string, // Optional Source process ASIM field
+    SrcProcessGuid: string, // Optional Source process ASIM field
+    DstIpAddr: string, // Optional Destination system ASIM field
+    DstGeoCountry: string, // Optional Destination system ASIM field
+    DstGeoRegion: string, // Optional Destination system ASIM field
+    DstGeoCity: string, // Optional Destination system ASIM field
+    DstGeoLatitude: string, // Optional Destination system ASIM field
+    DstGeoLongitude: string, // Optional Destination system ASIM field
+    DstRiskLevel: int, // Optional Destination system ASIM field
+    DstOriginalRiskLevel: string, // Optional Destination system ASIM field
+    DstPortNumber: int, // Optional Destination system ASIM field
+    DstHostname: string, // Optional Destination system ASIM field
+    DstDomain: string, // Optional Destination system ASIM field
+    DstDomainType: string, // Conditional Destination system ASIM field
+    DstFQDN: string, // Optional Destination system ASIM field
+    DstDvcId: string, // Optional Destination system ASIM field
+    DstDvcScopeId: string, // Optional Destination system ASIM field
+    DstDvcScope: string, // Optional Destination system ASIM field
+    DstDvcIdType: string, // Conditional Destination system ASIM field
+    DstDeviceType: string, // Optional Destination system ASIM field
+    DstDescription: string, // Optional Destination system ASIM field
+    DnsQuery: string, // Mandatory DNS specific ASIM field
+    DnsQueryType: int, // Optional DNS specific ASIM field
+    DnsQueryTypeName: string, // Recommended DNS specific ASIM field
+    DnsResponseName: string, // Optional DNS specific ASIM field
+    DnsResponseCode: int, // Optional DNS specific ASIM field
+    TransactionIdHex: string, // Recommended DNS specific ASIM field
+    NetworkProtocol: string, // Optional DNS specific ASIM field
+    NetworkProtocolVersion: string, // Optional DNS specific ASIM field
+    DnsQueryClass: int, // Optional DNS specific ASIM field
+    DnsQueryClassName: string, // Optional DNS specific ASIM field
+    DnsFlags: string, // Optional DNS specific ASIM field
+    DnsNetworkDuration: int, // Optional DNS specific ASIM field
+    DnsFlagsAuthenticated: bool, // Optional DNS specific ASIM field
+    DnsFlagsAuthoritative: bool, // Optional DNS specific ASIM field
+    DnsFlagsCheckingDisabled: bool, // Optional DNS specific ASIM field
+    DnsFlagsRecursionAvailable: bool, // Optional DNS specific ASIM field
+    DnsFlagsRecursionDesired: bool, // Optional DNS specific ASIM field
+    DnsFlagsTruncated: bool, // Optional DNS specific ASIM field
+    DnsFlagsZ: bool, // Optional DNS specific ASIM field
+    DnsSessionId: string, // Optional DNS specific ASIM field
+    DnsResponseIpCountry: string, // Optional DNS specific ASIM field
+    DnsResponseIpRegion: string, // Optional DNS specific ASIM field
+    DnsResponseIpCity: string, // Optional DNS specific ASIM field
+    DnsResponseIpLatitude: string, // Optional DNS specific ASIM field
+    DnsResponseIpLongitude: string, // Optional DNS specific ASIM field
+    UrlCategory: string, // Optional inspection ASIM field
+    NetworkRuleName: string, // Optional inspection ASIM field
+    NetworkRuleNumber: int, // Optional inspection ASIM field
+    ThreatId: string, // Optional inspection ASIM field
+    ThreatCategory: string, // Optional inspection ASIM field
+    ThreatIpAddr: string, // Optional inspection ASIM field
+    ThreatField: string, // Conditional inspection ASIM field
+    ThreatName: string, // Optional inspection ASIM field
+    ThreatConfidence: int, // Optional inspection ASIM field
+    ThreatOriginalConfidence: string, // Optional inspection ASIM field
+    ThreatRiskLevel: int, // Optional inspection ASIM field
+    ThreatOriginalRiskLevel: string, // Optional inspection ASIM field
+    ThreatIsActive: bool, // Optional inspection ASIM field
+    ThreatFirstReportedTime: datetime, // Optional inspection ASIM field
+    ThreatLastReportedTime: datetime // Optional inspection ASIM field
+)
+
+.create-merge table ASimFileEventLogs (
+    EventCount: string, // Mandatory common ASIM field
+    EventStartTime: datetime, // Mandatory common ASIM field
+    EventEndTime: datetime, // Mandatory common ASIM field
+    EventType: string, // Mandatory common ASIM field
+    EventResult: string, // Mandatory common ASIM field
+    EventProduct: string, // Mandatory common ASIM field
+    EventVendor: string, // Mandatory common ASIM field
+    EventSchema: string, // Mandatory common ASIM field
+    EventSchemaVersion: string, // Mandatory common ASIM field
+    Dvc: string, // Mandatory common ASIM field
+    EventResultDetails: string, // Recommended common ASIM field
+    EventSeverity: string, // Recommended common ASIM field
+    EventUid: string, // Recommended common ASIM field
+    DvcIpAddr: string, // Recommended common ASIM field
+    DvcHostname: string, // Recommended common ASIM field
+    DvcDomain: string, // Recommended common ASIM field
+    DvcDomainType: string, // Recommended common ASIM field
+    DvcFQDN: string, // Recommended common ASIM field
+    DvcId: string, // Recommended common ASIM field
+    DvcIdType: string, // Recommended common ASIM field
+    DvcAction: string, // Recommended common ASIM field
+    EventMessage: string, // Optional common ASIM field
+    EventSubType: string, // Optional common ASIM field
+    EventOriginalUid: string, // Optional common ASIM field
+    EventOriginalType: string, // Optional common ASIM field
+    EventOriginalSubType: string, // Optional common ASIM field
+    EventOriginalResultDetails: string, // Optional common ASIM field
+    EventOriginalSeverity: string, // Optional common ASIM field
+    EventProductVersion: string, // Optional common ASIM field
+    EventReportUrl: string, // Optional common ASIM field
+    EventOwner: string, // Optional common ASIM field
+    DvcZone: string, // Optional common ASIM field
+    DvcMacAddr: string, // Optional common ASIM field
+    DvcOs: string, // Optional common ASIM field
+    DvcOsVersion: string, // Optional common ASIM field
+    DvcOriginalAction: string, // Optional common ASIM field
+    DvcInterface: string, // Optional common ASIM field
+    AdditionalFields: dynamic, // Optional common ASIM field
+    DvcDescription: string, // Optional common ASIM field
+    DvcScope: string, // Optional common ASIM field
+    DvcScopeId: string, // Optional common ASIM field
+    TargetFileCreationTime: datetime, // Optional Target file fields
+    TargetFileDirectory: string, // Optional Target file fields
+    TargetFileExtension: string, // Optional Target file fields
+    TargetFileMimeType: string, // Optional Target file fields
+    TargetFileName: string, // Recommended Target file fields
+    TargetFilePath: string, // Mandatory Target file fields
+    TargetFilePathType: string, // Mandatory Target file fields
+    TargetFileMD5: string, // Optional Target file fields
+    TargetFileSHA1: string, // Optional Target file fields
+    TargetFileSHA256: string, // Optional Target file fields
+    TargetFileSHA512: string, // Optional Target file fields
+    HashType: string, // Recommended Target file fields
+    TargetFileSize: long, // Optional Target file fields
+    SrcFileCreationTime: datetime, // Optional Source file fields
+    SrcFileDirectory: string, // Optional Source file fields
+    SrcFileExtension: string, // Optional Source file fields
+    SrcFileMimeType: string, // Optional Source file fields
+    SrcFileName: string, // Recommended Source file fields
+    SrcFilePath: string, // Recommended Source file fields
+    SrcFilePathType: string, // Recommended Source file fields
+    SrcFileMD5: string, // Optional Source file fields
+    SrcFileSHA1: string, // Optional Source file fields
+    SrcFileSHA256: string, // Optional Source file fields
+    SrcFileSHA512: string, // Optional Source file fields
+    SrcFileSize: long, // Optional Source file fields
+    ActorUserId: string, // Recommended Actor fields
+    ActorScope: string, // Optional Actor fields
+    ActorScopeId: string, // Optional Actor fields
+    ActorUserIdType: string, // Conditional Actor fields
+    ActorUsername: string, // Mandatory Actor fields
+    ActorUsernameType: string, // Conditional Actor fields
+    ActorSessionId: string, // Optional Actor fields
+    ActorUserType: string, // Optional Actor fields
+    ActorOriginalUserType: string, // Optional Actor fields
+    ActingProcessCommandLine: string, // Optional Acting process fields
+    ActingProcessName: string, // Optional Acting process fields
+    ActingProcessId: string, // Optional Acting process fields
+    ActingProcessGuid: string, // Optional Acting process fields
+    SrcIpAddr: string, // Recommended Source system related fields
+    SrcPortNumber: int, // Optional Source system related fields
+    SrcHostname: string, // Recommended Source system related fields
+    SrcDomain: string, // Recommended Source system related fields
+    SrcDomainType: string, // Conditional Source system related fields
+    SrcFQDN: string, // Optional Source system related fields
+    SrcDescription: string, // Optional Source system related fields
+    SrcDvcId: string, // Optional Source system related fields
+    SrcDvcScopeId: string, // Optional Source system related fields
+    SrcDvcScope: string, // Optional Source system related fields
+    SrcDvcIdType: string, // Conditional Source system related fields
+    SrcDeviceType: string, // Optional Source system related fields
+    SrcSubscriptionId: string, // Optional Source system related fields
+    SrcGeoCountry: string, // Optional Source system related fields
+    SrcGeoRegion: string, // Optional Source system related fields
+    SrcGeoCity: string, // Optional Source system related fields
+    SrcGeoLatitude: string, // Optional Source system related fields
+    SrcGeoLongitude: string, // Optional Source system related fields
+    TargetAppName: string, // Optional Target application fields
+    TargetAppId: string, // Optional Target application fields
+    TargetAppType: string, // Optional Target application fields
+    TargetUrl: string, // Optional Target application fields
+    HttpUserAgent: string, // Optional Network related fields
+    NetworkApplicationProtocol: string, // Optional Network related fields
+    RuleName: string, // Optional Inspection fields
+    RuleNumber: int, // Optional Inspection fields
+    Rule: string, // Conditional Inspection fields
+    ThreatId: string, // Optional Inspection fields
+    ThreatName: string, // Optional Inspection fields
+    ThreatCategory: string, // Optional Inspection fields
+    ThreatRiskLevel: int, // Optional Inspection fields
+    ThreatOriginalRiskLevel: string, // Optional Inspection fields
+    ThreatFilePath: string, // Optional Inspection fields
+    ThreatField: string, // Optional Inspection fields
+    ThreatConfidence: int, // Optional Inspection fields
+    ThreatOriginalConfidence: string, // Optional Inspection fields
+    ThreatIsActive: bool, // Optional Inspection fields
+    ThreatFirstReportedTime: datetime, // Optional Inspection fields
+    ThreatLastReportedTime: datetime // Optional Inspection fields
+)
+
+.create-merge table ASimNetworkSessionLogs (
+    EventCount: string, // Mandatory common ASIM field
+    EventStartTime: datetime, // Mandatory common ASIM field
+    EventEndTime: datetime, // Mandatory common ASIM field
+    EventType: string, // Mandatory common ASIM field
+    EventResult: string, // Mandatory common ASIM field
+    EventProduct: string, // Mandatory common ASIM field
+    EventVendor: string, // Mandatory common ASIM field
+    EventSchema: string, // Mandatory common ASIM field
+    EventSchemaVersion: string, // Mandatory common ASIM field
+    Dvc: string, // Mandatory common ASIM field
+    EventResultDetails: string, // Recommended common ASIM field
+    EventSeverity: string, // Recommended common ASIM field
+    EventUid: string, // Recommended common ASIM field
+    DvcIpAddr: string, // Recommended common ASIM field
+    DvcHostname: string, // Recommended common ASIM field
+    DvcDomain: string, // Recommended common ASIM field
+    DvcDomainType: string, // Recommended common ASIM field
+    DvcFQDN: string, // Recommended common ASIM field
+    DvcId: string, // Recommended common ASIM field
+    DvcIdType: string, // Recommended common ASIM field
+    DvcAction: string, // Recommended common ASIM field
+    EventMessage: string, // Optional common ASIM field
+    EventSubType: string, // Optional common ASIM field
+    EventOriginalUid: string, // Optional common ASIM field
+    EventOriginalType: string, // Optional common ASIM field
+    EventOriginalSubType: string, // Optional common ASIM field
+    EventOriginalResultDetails: string, // Optional common ASIM field
+    EventOriginalSeverity: string, // Optional common ASIM field
+    EventProductVersion: string, // Optional common ASIM field
+    EventReportUrl: string, // Optional common ASIM field
+    EventOwner: string, // Optional common ASIM field
+    DvcZone: string, // Optional common ASIM field
+    DvcMacAddr: string, // Optional common ASIM field
+    DvcOs: string, // Optional common ASIM field
+    DvcOsVersion: string, // Optional common ASIM field
+    DvcOriginalAction: string, // Optional common ASIM field
+    DvcInterface: string, // Optional common ASIM field
+    AdditionalFields: dynamic, // Optional common ASIM field
+    DvcDescription: string, // Optional common ASIM field
+    DvcScope: string, // Optional common ASIM field
+    DvcScopeId: string, // Optional common ASIM field
+    SrcIpAddr: string, // Recommended Source system field
+    SrcPortNumber: int, // Optional Source system field
+    SrcHostname: string, // Recommended Source system field
+    SrcDomain: string, // Recommended Source system field
+    SrcDomainType: string, // Conditional Source system field
+    SrcFQDN: string, // Optional Source system field
+    SrcDvcId: string, // Optional Source system field
+    SrcDvcScopeId: string, // Optional Source system field
+    SrcDvcScope: string, // Optional Source system field
+    SrcDvcIdType: string, // Conditional Source system field
+    SrcDeviceType: string, // Optional Source system field
+    SrcZone: string, // Optional Source system field
+    SrcInterfaceName: string, // Optional Source system field
+    SrcInterfaceGuid: string, // Optional Source system field
+    SrcMacAddr: string, // Optional Source system field
+    SrcVlanId: string, // Optional Source system field
+    SrcSubscriptionId: string, // Optional Source system field
+    SrcGeoCountry: string, // Optional Source system field
+    SrcGeoRegion: string, // Optional Source system field
+    SrcGeoCity: string, // Optional Source system field
+    SrcGeoLatitude: string, // Optional Source system field
+    SrcGeoLongitude: string, // Optional Source system field
+    NetworkApplicationProtocol: string, // Optional Network session field
+    NetworkProtocol: string, // Optional Network session field
+    NetworkProtocolVersion: string, // Optional Network session field
+    NetworkDirection: string, // Optional Network session field
+    NetworkDuration: int, // Optional Network session field
+    NetworkIcmpType: string, // Optional Network session field
+    NetworkIcmpCode: int, // Optional Network session field
+    NetworkConnectionHistory: string, // Optional Network session field
+    DstBytes: long, // Recommended Network session field
+    SrcBytes: long, // Recommended Network session field
+    NetworkBytes: long, // Optional Network session field
+    DstPackets: long, // Optional Network session field
+    SrcPackets: long, // Optional Network session field
+    NetworkPackets: long, // Optional Network session field
+    NetworkSessionId: string, // Optional Network session field
+    TcpFlagsAck: bool, // Optional Network session field
+    TcpFlagsFin: bool, // Optional Network session field
+    TcpFlagsSyn: bool, // Optional Network session field
+    TcpFlagsUrg: bool, // Optional Network session field
+    TcpFlagsPsh: bool, // Optional Network session field
+    TcpFlagsRst: bool, // Optional Network session field
+    TcpFlagsEce: bool, // Optional Network session field
+    TcpFlagsCwr: bool, // Optional Network session field
+    TcpFlagsNs: bool, // Optional Network session field
+    DstIpAddr: string, // Recommended Destination system field
+    DstPortNumber: int, // Optional Destination system field
+    DstHostname: string, // Recommended Destination system field
+    DstDomain: string, // Recommended Destination system field
+    DstDomainType: string, // Conditional Destination system field
+    DstFQDN: string, // Optional Destination system field
+    DstDvcId: string, // Optional Destination system field
+    DstDvcScopeId: string, // Optional Destination system field
+    DstDvcScope: string, // Optional Destination system field
+    DstDvcIdType: string, // Conditional Destination system field
+    DstDeviceType: string, // Optional Destination system field
+    DstZone: string, // Optional Destination system field
+    DstInterfaceName: string, // Optional Destination system field
+    DstInterfaceGuid: string, // Optional Destination system field
+    DstMacAddr: string, // Optional Destination system field
+    DstVlanId: string, // Optional Destination system field
+    DstSubscriptionId: string, // Optional Destination system field
+    DstGeoCountry: string, // Optional Destination system field
+    DstGeoRegion: string, // Optional Destination system field
+    DstGeoCity: string, // Optional Destination system field
+    DstGeoLatitude: string, // Optional Destination system field
+    DstGeoLongitude: string, // Optional Destination system field
+    DstUserId: string, // Optional Destination user field
+    DstUserScope: string, // Optional Destination user field
+    DstUserScopeId: string, // Optional Destination user field
+    DstUserIdType: string, // Conditional Destination user field
+    DstUsername: string, // Optional Destination user field
+    DstUsernameType: string, // Conditional Destination user field
+    DstUserType: string, // Optional Destination user field
+    DstOriginalUserType: string, // Optional Destination user field
+    DstAppName: string, // Optional Destination user field
+    DstAppId: string, // Optional Destination user field
+    DstAppType: string, // Optional Destination user field
+    DstProcessName: string, // Optional Destination user field
+    DstProcessId: string, // Optional Destination user field
+    DstProcessGuid: string, // Optional Destination user field
+    SrcUserId: string, // Optional Source user field
+    SrcUserScope: string, // Optional Source user field
+    SrcUserScopeId: string, // Optional Source user field
+    SrcUserIdType: string, // Conditional Source user field
+    SrcUsername: string, // Optional Source user field
+    SrcUsernameType: string, // Conditional Source user field
+    SrcUserType: string, // Optional Source user field
+    SrcOriginalUserType: string, // Optional Source user field
+    SrcAppName: string, // Optional Source application field
+    SrcAppId: string, // Optional Source application field
+    SrcAppType: string, // Optional Source application field
+    SrcProcessName: string, // Optional Source application field
+    SrcProcessId: string, // Optional Source application field
+    SrcProcessGuid: string, // Optional Source application field
+    DstNatIpAddr: string, // Optional Intermediary device and NAT fields
+    DstNatPortNumber: int, // Optional Intermediary device and NAT fields
+    SrcNatIpAddr: string, // Optional Intermediary device and NAT fields
+    SrcNatPortNumber: int, // Optional Intermediary device and NAT fields
+    DvcInboundInterface: string, // Optional Intermediary device and NAT fields
+    DvcOutboundInterface: string, // Optional Intermediary device and NAT fields
+    NetworkRuleName: string, // Optional Inspection field
+    NetworkRuleNumber: int, // Optional Inspection field
+    ThreatId: string, // Optional Inspection field
+    ThreatName: string, // Optional Inspection field
+    ThreatCategory: string, // Optional Inspection field
+    ThreatRiskLevel: int, // Optional Inspection field
+    ThreatOriginalRiskLevel: string, // Optional Inspection field
+    ThreatIpAddr: string, // Optional Inspection field
+    ThreatField: string, // Conditional Inspection field
+    ThreatConfidence: int, // Optional Inspection field
+    ThreatOriginalConfidence: string, // Optional Inspection field
+    ThreatIsActive: bool, // Optional Inspection-scific field
+    ThreatFirstReportedTime: datetime, // Optional Inspection field
+    ThreatLastReportedTime: datetime // Optional Inspection field
+)
+
+.create-merge table ASimProcessEventLogs (
+    EventCount: string, // Mandatory common ASIM field
+    EventStartTime: datetime, // Mandatory common ASIM field
+    EventEndTime: datetime, // Mandatory common ASIM field
+    EventType: string, // Mandatory common ASIM field
+    EventResult: string, // Mandatory common ASIM field
+    EventProduct: string, // Mandatory common ASIM field
+    EventVendor: string, // Mandatory common ASIM field
+    EventSchema: string, // Mandatory common ASIM field
+    EventSchemaVersion: string, // Mandatory common ASIM field
+    Dvc: string, // Mandatory common ASIM field
+    EventResultDetails: string, // Recommended common ASIM field
+    EventSeverity: string, // Recommended common ASIM field
+    EventUid: string, // Recommended common ASIM field
+    DvcIpAddr: string, // Recommended common ASIM field
+    DvcHostname: string, // Recommended common ASIM field
+    DvcDomain: string, // Recommended common ASIM field
+    DvcDomainType: string, // Recommended common ASIM field
+    DvcFQDN: string, // Recommended common ASIM field
+    DvcId: string, // Recommended common ASIM field
+    DvcIdType: string, // Recommended common ASIM field
+    DvcAction: string, // Recommended common ASIM field
+    EventMessage: string, // Optional common ASIM field
+    EventSubType: string, // Optional common ASIM field
+    EventOriginalUid: string, // Optional common ASIM field
+    EventOriginalType: string, // Optional common ASIM field
+    EventOriginalSubType: string, // Optional common ASIM field
+    EventOriginalResultDetails: string, // Optional common ASIM field
+    EventOriginalSeverity: string, // Optional common ASIM field
+    EventProductVersion: string, // Optional common ASIM field
+    EventReportUrl: string, // Optional common ASIM field
+    EventOwner: string, // Optional common ASIM field
+    DvcZone: string, // Optional common ASIM field
+    DvcMacAddr: string, // Optional common ASIM field
+    DvcOs: string, // Optional common ASIM field
+    DvcOsVersion: string, // Optional common ASIM field
+    DvcOriginalAction: string, // Optional common ASIM field
+    DvcInterface: string, // Optional common ASIM field
+    AdditionalFields: dynamic, // Optional common ASIM field
+    DvcDescription: string, // Optional common ASIM field
+    DvcScope: string, // Optional common ASIM field
+    DvcScopeId: string, // Optional common ASIM field
+    TargetUsername: string, // Mandatory for process create events, Target user fields
+    TargetUsernameType: string, // Conditional Target user fields
+    TargetUserId: string, // Recommended Target user fields
+    TargetUserIdType: string, // Conditional Target user fields
+    TargetUserSessionId: string, // Optional Target user fields
+    TargetUserType: string, // Optional Target user fields
+    TargetOriginalUserType: string, // Optional Target user fields
+    ActingProcessCommandLine: string, // Optional Acting process fields
+    ActingProcessName: string, // Optional Acting process fields
+    ActingProcessFileCompany: string, // Optional Acting process fields
+    ActingProcessFileDescription: string, // Optional Acting process fields
+    ActingProcessFileProduct: string, // Optional Acting process fields
+    ActingProcessFileVersion: string, // Optional Acting process fields
+    ActingProcessFileInternalName: string, // Optional Acting process fields
+    ActingProcessFileOriginalName: string, // Optional Acting process fields
+    ActingProcessIsHidden: bool, // Optional Acting process fields
+    ActingProcessInjectedAddress: string, // Optional Acting process fields
+    ActingProcessId: string, // Mandatory Acting process fields
+    ActingProcessGuid: string, // Optional Acting process fields
+    ActingProcessIntegrityLevel: string, // Optional Acting process fields
+    ActingProcessMD5: string, // Optional Acting process fields
+    ActingProcessSHA1: string, // Optional Acting process fields
+    ActingProcessSHA256: string, // Optional Acting process fields
+    ActingProcessSHA512: string, // Optional Acting process fields
+    ActingProcessIMPHASH: string, // Optional Acting process fields
+    ActingProcessCreationTime: datetime, // Optional Acting process fields
+    ActingProcessTokenElevation: string, // Optional Acting process fields
+    ActingProcessFileSize: long, // Optional Acting process fields
+    ActorUserId: string, // Recommended Actor fields
+    ActorUserIdType: string, // Conditional Actor fields
+    ActorScope: string, // Optional Actor fields
+    ActorUsername: string, // Mandatory Actor fields
+    ActorUsernameType: string, // Conditional Actor fields
+    ActorSessionId: string, // Optional Actor fields
+    ActorUserType: string, // Optional Actor fields
+    ActorOriginalUserType: string, // Optional Actor fields
+    ParentProcessName: string, // Optional Parent process fields
+    ParentProcessFileCompany: string, // Optional Parent process fields
+    ParentProcessFileDescription: string, // Optional Parent process fields
+    ParentProcessFileProduct: string, // Optional Parent process fields
+    ParentProcessFileVersion: string, // Optional Parent process fields
+    ParentProcessIsHidden: bool, // Optional Parent process fields
+    ParentProcessInjectedAddress: string, // Optional Parent process fields
+    ParentProcessId: string, // Recommended Parent process fields
+    ParentProcessGuid: string, // Optional Parent process fields
+    ParentProcessIntegrityLevel: string, // Optional Parent process fields
+    ParentProcessMD5: string, // Optional Parent process fields
+    ParentProcessSHA1: string, // Optional Parent process fields
+    ParentProcessSHA256: string, // Optional Parent process fields
+    ParentProcessSHA512: string, // Optional Parent process fields
+    ParentProcessIMPHASH: string, // Optional Parent process fields
+    ParentProcessTokenElevation: string, // Optional Parent process fields
+    ParentProcessCreationTime: datetime, // Optional Parent process fields
+    TargetProcessName: string, // Mandatory Target process fields
+    TargetProcessFileCompany: string, // Optional Target process fields
+    TargetProcessFileDescription: string, // Optional Target process fields
+    TargetProcessFileProduct: string, // Optional Target process fields
+    TargetProcessFileSize: string, // Optional Target process fields
+    TargetProcessFileVersion: string, // Optional Target process fields
+    TargetProcessFileInternalName: string, // Optional Target process fields
+    TargetProcessFileOriginalName: string, // Optional Target process fields
+    TargetProcessIsHidden: bool, // Optional Target process fields
+    TargetProcessInjectedAddress: string, // Optional Target process fields
+    TargetProcessMD5: string, // Optional Target process fields
+    TargetProcessSHA1: string, // Optional Target process fields
+    TargetProcessSHA256: string, // Optional Target process fields
+    TargetProcessSHA512: string, // Optional Target process fields
+    TargetProcessIMPHASH: string, // Optional Target process fields
+    HashType: string, // Recommended Target process fields
+    TargetProcessCommandLine: string, // Mandatory Target process fields
+    TargetProcessCurrentDirectory: string, // Optional Target process fields
+    TargetProcessCreationTime: datetime, // Recommended Target process fields
+    TargetProcessId: string, // Mandatory Target process fields
+    TargetProcessGuid: string, // Optional Target process fields
+    TargetProcessIntegrityLevel: string, // Optional Target process fields
+    TargetProcessTokenElevation: string, // Optional Target process fields
+    TargetProcessStatusCode: string // Optional Target process fields
+)
+
+.create-merge table ASimRegistryEventLogs (
+    EventCount: string, // Mandatory common ASIM field
+    EventStartTime: datetime, // Mandatory common ASIM field
+    EventEndTime: datetime, // Mandatory common ASIM field
+    EventType: string, // Mandatory common ASIM field
+    EventResult: string, // Mandatory common ASIM field
+    EventProduct: string, // Mandatory common ASIM field
+    EventVendor: string, // Mandatory common ASIM field
+    EventSchema: string, // Mandatory common ASIM field
+    EventSchemaVersion: string, // Mandatory common ASIM field
+    Dvc: string, // Mandatory common ASIM field
+    EventResultDetails: string, // Recommended common ASIM field
+    EventSeverity: string, // Recommended common ASIM field
+    EventUid: string, // Recommended common ASIM field
+    DvcIpAddr: string, // Recommended common ASIM field
+    DvcHostname: string, // Recommended common ASIM field
+    DvcDomain: string, // Recommended common ASIM field
+    DvcDomainType: string, // Recommended common ASIM field
+    DvcFQDN: string, // Recommended common ASIM field
+    DvcId: string, // Recommended common ASIM field
+    DvcIdType: string, // Recommended common ASIM field
+    DvcAction: string, // Recommended common ASIM field
+    EventMessage: string, // Optional common ASIM field
+    EventSubType: string, // Optional common ASIM field
+    EventOriginalUid: string, // Optional common ASIM field
+    EventOriginalType: string, // Optional common ASIM field
+    EventOriginalSubType: string, // Optional common ASIM field
+    EventOriginalResultDetails: string, // Optional common ASIM field
+    EventOriginalSeverity: string, // Optional common ASIM field
+    EventProductVersion: string, // Optional common ASIM field
+    EventReportUrl: string, // Optional common ASIM field
+    EventOwner: string, // Optional common ASIM field
+    DvcZone: string, // Optional common ASIM field
+    DvcMacAddr: string, // Optional common ASIM field
+    DvcOs: string, // Optional common ASIM field
+    DvcOsVersion: string, // Optional common ASIM field
+    DvcOriginalAction: string, // Optional common ASIM field
+    DvcInterface: string, // Optional common ASIM field
+    AdditionalFields: dynamic, // Optional common ASIM field
+    DvcDescription: string, // Optional common ASIM field
+    DvcScope: string, // Optional common ASIM field
+    DvcScopeId: string, // Optional common ASIM field
+    RegistryKey: string, // Mandatory Registry Event specific fields
+    RegistryValue: string, // Recommended Registry Event specific fields
+    RegistryValueType: string, // Recommended Registry Event specific fields
+    RegistryValueData: string, // Recommended Registry Event specific fields
+    RegistryPreviousKey: string, // Recommended Registry Event specific fields
+    RegistryPreviousValue: string, // Recommended Registry Event specific fields
+    RegistryPreviousValueType: string, // Recommended Registry Event specific fields
+    RegistryPreviousValueData: string, // Recommended Registry Event specific fields
+    ActorUsername: string, // Mandatory Registry Event specific fields
+    ActorUsernameType: string, // Conditional Registry Event specific fields
+    ActorUserId: string, // Recommended Registry Event specific fields
+    ActorScope: string, // Optional Registry Event specific fields
+    ActorUserIdType: string, // Recommended Registry Event specific fields
+    ActorSessionId: string, // Conditional Registry Event specific fields
+    ActingProcessName: string, // Optional Registry Event specific fields
+    ActingProcessId: string, // Mandatory Registry Event specific fields
+    ActingProcessGuid: string, // Optional Registry Event specific fields
+    ParentProcessName: string, // Optional Registry Event specific fields
+    ParentProcessId: string, // Mandatory Registry Event specific fields
+    ParentProcessGuid: string // Optional Registry Event specific fields
+)
+
+.create-merge table ASimUserManagementActivityLogs (
+    EventCount: long, // Mandatory common ASIM field
+    EventStartTime: datetime, // Mandatory common ASIM field
+    EventEndTime: datetime, // Mandatory common ASIM field
+    EventType: string, // Mandatory common ASIM field
+    EventResult: string, // Mandatory common ASIM field
+    EventProduct: string, // Mandatory common ASIM field
+    EventVendor: string, // Mandatory common ASIM field
+    EventSchema: string, // Mandatory common ASIM field
+    EventSchemaVersion: string, // Mandatory common ASIM field
+    Dvc: string, // Mandatory common ASIM field
+    EventResultDetails: string, // Recommended common ASIM field
+    EventSeverity: string, // Recommended common ASIM field
+    EventUid: string, // Recommended common ASIM field
+    DvcIpAddr: string, // Recommended common ASIM field
+    DvcHostname: string, // Recommended common ASIM field
+    DvcDomain: string, // Recommended common ASIM field
+    DvcDomainType: string, // Recommended common ASIM field
+    DvcFQDN: string, // Recommended common ASIM field
+    DvcId: string, // Recommended common ASIM field
+    DvcIdType: string, // Recommended common ASIM field
+    DvcAction: string, // Recommended common ASIM field
+    EventMessage: string, // Optional common ASIM field
+    EventSubType: string, // Optional common ASIM field
+    EventOriginalUid: string, // Optional common ASIM field
+    EventOriginalType: string, // Optional common ASIM field
+    EventOriginalSubType: string, // Optional common ASIM field
+    EventOriginalResultDetails: string, // Optional common ASIM field
+    EventOriginalSeverity: string, // Optional common ASIM field
+    EventProductVersion: string, // Optional common ASIM field
+    EventReportUrl: string, // Optional common ASIM field
+    EventOwner: string, // Optional common ASIM field
+    DvcZone: string, // Optional common ASIM field
+    DvcMacAddr: string, // Optional common ASIM field
+    DvcOs: string, // Optional common ASIM field
+    DvcOsVersion: string, // Optional common ASIM field
+    DvcOriginalAction: string, // Optional common ASIM field
+    DvcInterface: string, // Optional common ASIM field
+    AdditionalFields: dynamic, // Optional common ASIM field
+    DvcDescription: string, // Optional common ASIM field
+    DvcScope: string, // Optional common ASIM field
+    DvcScopeId: string, // Optional common ASIM field
+    TargetUserId: string, // Optional Target user fields
+    TargetUserIdType: string, // Optional Target user fields
+    TargetUsername: string, // Optional Target user fields
+    TargetUsernameType: string, // Optional Target user fields
+    TargetUserType: string, // Optional Target user fields
+    TargetOriginalUserType: string, // Optional Target user fields
+    ActorUserId: string, // Optional Actor fields
+    ActorUserIdType: string, // Optional Actor fields
+    ActorUsername: string, // Mandatory Actor fields
+    ActorUsernameType: string, // Mandatory Actor fields
+    ActorUserType: string, // Optional Actor fields
+    ActorOriginalUserType: string, // Optional Actor fields
+    ActorSessionId: string, // Optional Actor fields
+    PreviousPropertyValue: string, // Optional Updated property fields
+    NewPropertyValue: string, // Optional Updated property fields
+    GroupId: string, // Optional Group fields
+    GroupIdType: string, // Optional Group fields
+    GroupName: string, // Optional Group fields
+    GroupNameType: string, // Optional Group fields
+    GroupType: string, // Optional Group fields
+    GroupOriginalType: string, // Optional Group fields
+    Src: string, // Recommended Source fields
+    SrcIpAddr: string, // Recommended Source fields
+    SrcHostname: string, // Recommended Source fields
+    SrcDomain: string, // Recommended Source fields
+    SrcDomainType: string, // Recommended Source fields
+    SrcFQDN: string, // Optional Source fields
+    SrcDvcId: string, // Optional Source fields
+    SrcDvcScopeId: string, // Optional Source fields
+    SrcDvcScope: string, // Optional Source fields
+    SrcDvcIdType: string, // Optional Source fields
+    SrcDeviceType: string, // Optional Source fields
+    SrcGeoCountry: string, // Optional Source fields
+    SrcGeoRegion: string, // Optional Source fields
+    SrcGeoCity: string, // Optional Source fields
+    SrcGeoLatitude: real, // Optional Source fields
+    SrcGeoLongitude: real, // Optional Source fields
+    ActingAppId: string, // Optional Acting Application
+    ActingAppName: string, // Optional Acting Application
+    ActingAppType: string, // Optional Acting Application
+    HttpUserAgent: string // Optional Acting Application
+)
